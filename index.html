@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Downloader</title>
+</head>
+<body>
+    <h1>Media Downloader</h1>
+    <form id="downloadForm">
+        <label for="videoUrl">Video URL:</label>
+        <input type="text" id="videoUrl" required>
+        <br>
+        <label for="format">Format:</label>
+        <input type="text" id="format" required>
+        <br>
+        <label for="outputFormat">Output Format (optional, default is mp4):</label>
+        <input type="text" id="outputFormat">
+        <br>
+        <button type="button" onclick="downloadMedia()">Download</button>
+    </form>
+    <div id="downloadResult"></div>
+
+    <script>
+        function downloadMedia() {
+            const videoUrl = document.getElementById('videoUrl').value;
+            const format = document.getElementById('format').value;
+            const outputFormat = document.getElementById('outputFormat').value || 'mp4';
+
+            // サーバーにリクエストを送信
+            fetch(`./download?video_url=${encodeURIComponent(videoUrl)}&format=${encodeURIComponent(format)}&output_format=${encodeURIComponent(outputFormat)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('downloadResult').innerHTML = `<p>Error: ${data.error}</p>`;
+                    } else {
+                        // ダウンロードURLを表示
+                        document.getElementById('downloadResult').innerHTML = `<p>Download URL: <a href="${data.download_url}" target="_blank">${data.download_url}</a></p>`;
+                        
+                        // ダウンロード用のリンクを生成
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = data.embedded_url;
+                        downloadLink.download = `download.${outputFormat}`;
+                        downloadLink.textContent = 'Download File';
+                        
+                        // 結果にリンクを追加
+                        document.getElementById('downloadResult').appendChild(downloadLink);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('downloadResult').innerHTML = `<p>Error: ${error.message}</p>`;
+                });
+        }
+    </script>
+</body>
+</html>
