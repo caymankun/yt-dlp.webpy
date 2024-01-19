@@ -1,50 +1,38 @@
+from flask import Flask, request, jsonify
+import subprocess
 from flask_cors import CORS
-from flask import Flask, request, jsonify, send_file
-import yt_dlp
-import os
 
 app = Flask(__name__)
+CORS(app)
 
-def download_media(video_url, output_path, options):
-    ydl_opts = {
-        'outtmpl': f'{output_path}.%(ext)s',
-        **options
-    }
+def embed_thumbnail_url(video_url, thumbnail_url):
+    # 動画URLにサムネイルURLをクエリパラメータとして追加
+    embedded_url = f"{video_url}?thumbnail={thumbnail_url}"
+    return embedded_url
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(video_url, download=True)
-        media_file = ydl.prepare_filename(info)
-
-    return f'{media_file}'
-
-@app.route('/download', methods=['POST'])
-def download_media_endpoint():
-    # クエリパラメーターから動画URLとメディアの種類を取得
-    video_url = request.args.get('url')
-    media_type = request.args.get('type', 'audio')  # デフォルトは音声
-
-    if not video_url:
-        return jsonify({'error': 'Invalid request. "url" parameter is required.'}), 400
-
-    try:
-        # ダウンロード先のファイルパスを作成
-        output_path = f"downloads/{media_type.capitalize()}/{os.path.basename(video_url)}"
-
-        # yt-dlpを使用してメディアをダウンロード
-        if media_type == 'video':
-            options = {'format': 'bestvideo+bestaudio/best/mp4', 'merge_output_format': 'mp4', 'embed-thumbnail': True}
-        elif media_type == 'audio':
-            options = {'format': 'bestaudio/best', 'extractaudio': True, 'audioformat': 'mp3', 'embed-thumbnail': True, 'addmetadata': True}
-        else:
-            return jsonify({'error': 'Invalid media type. Supported types are "video" and "audio".'}), 400
-
-        media_file = download_media(video_url, output_path, options)
-
-        # ダウンロードしたメディアファイルをそのまま提供
-        return send_file(media_file, as_attachment=True)
-    
-    except Exception as e:
-        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+@app.route('/', methods=['POST'])
+def download_video():
+    if request.method == 'POST':
+        video_url = request.form['video_url']
+        format = request.form['format']
+        
+        # サムネイルURLをリクエストから取得
+        thumbnail_url = request.form.get('thumbnail_url', '')  # 'thumbnail_url' を取得
+        
+        try:
+            # yt-dlpコマンドを実行してダウンロードURLを取得
+            command = ["yt-dlp", "--format", format, "--get-url", video_url]
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            download_url = result.stdout.strip()
+            
+            if download_url:
+                # サムネイルを埋め込んだURLを生成
+                embedded_url = embed_thumbnail_url(download_url, thumbnail_url)
+                return jsonify({"download_url": download_url, "embedded_url": embedded_url})
+            else:
+                return jsonify({"error": "ダウンロードURLの取得に失敗しました。"})
+        except subprocess.CalledProcessError as e:
+            return jsonify({"error": str(e)})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
