@@ -1,38 +1,48 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import subprocess
+import os
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-def embed_thumbnail_url(video_url, thumbnail_url):
-    # 動画URLにサムネイルURLをクエリパラメータとして追加
-    embedded_url = f"{video_url}?thumbnail={thumbnail_url}"
-    return embedded_url
+def download_media(video_url, format, output_format):
+    try:
+        # yt-dlpコマンドを実行して動画または音声のダウンロード
+        command = ["yt-dlp", "--format", format, "--get-url", video_url]
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        download_url = result.stdout.strip()
 
-@app.route('/', methods=['POST'])
-def download_video():
-    if request.method == 'POST':
-        video_url = request.form['video_url']
-        format = request.form['format']
-        
-        # サムネイルURLをリクエストから取得
-        thumbnail_url = request.form.get('thumbnail_url', '')  # 'thumbnail_url' を取得
-        
+        # ダウンロードしたメディアを一時的なファイルに保存
+        temp_filename = f"temp.{output_format}"
+        subprocess.run(["yt-dlp", "--format", format, "--output", temp_filename, video_url], check=True)
+
+        return temp_filename
+    except subprocess.CalledProcessError as e:
+        return None
+
+@app.route('/download', methods=['GET'])
+def download():
+    video_url = request.args.get('video_url')
+    format = request.args.get('format')
+    output_format = request.args.get('output_format', 'mp4')  # デフォルトはmp4
+
+    if not video_url or not format:
+        return jsonify({"error": "video_urlとformatは必須です。"})
+
+    # メディアのダウンロード
+    temp_filename = download_media(video_url, format, output_format)
+
+    if temp_filename:
         try:
-            # yt-dlpコマンドを実行してダウンロードURLを取得
-            command = ["yt-dlp", "--format", format, "--get-url", video_url]
-            result = subprocess.run(command, capture_output=True, text=True, check=True)
-            download_url = result.stdout.strip()
-            
-            if download_url:
-                # サムネイルを埋め込んだURLを生成
-                embedded_url = embed_thumbnail_url(download_url, thumbnail_url)
-                return jsonify({"download_url": download_url, "embedded_url": embedded_url})
-            else:
-                return jsonify({"error": "ダウンロードURLの取得に失敗しました。"})
-        except subprocess.CalledProcessError as e:
-            return jsonify({"error": str(e)})
+            # ダウンロードしたメディアをユーザーに提供
+            return send_file(temp_filename, as_attachment=True, download_name=f"download.{output_format}")
+        finally:
+            # 一時ファイルを削除
+            os.remove(temp_filename)
+    else:
+        return jsonify({"error": "メディアのダウンロードに失敗しました。"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
+
