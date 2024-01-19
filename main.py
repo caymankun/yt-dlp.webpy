@@ -14,7 +14,7 @@ def embed_thumbnail_url(video_url, thumbnail_url):
 def download_video():
     if request.method == 'POST':
         video_url = request.form['video_url']
-        format = request.form['format']
+        format = "mp4"
         
         # サムネイルURLをリクエストから取得
         thumbnail_url = request.form.get('thumbnail_url', '')  # 'thumbnail_url' を取得
