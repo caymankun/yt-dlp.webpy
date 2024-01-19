@@ -1,48 +1,50 @@
-from flask import Flask, request, jsonify, send_file
-import subprocess
-import os
 from flask_cors import CORS
+from flask import Flask, request, jsonify, send_file
+import yt_dlp
+import os
 
 app = Flask(__name__)
-CORS(app)
 
-def download_media(video_url, format, output_format):
+def download_media(video_url, output_path, options):
+    ydl_opts = {
+        'outtmpl': f'{output_path}.%(ext)s',
+        **options
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(video_url, download=True)
+        media_file = ydl.prepare_filename(info)
+
+    return f'{media_file}'
+
+@app.route('/download', methods=['POST'])
+def download_media_endpoint():
+    # クエリパラメーターから動画URLとメディアの種類を取得
+    video_url = request.args.get('url')
+    media_type = request.args.get('type', 'audio')  # デフォルトは音声
+
+    if not video_url:
+        return jsonify({'error': 'Invalid request. "url" parameter is required.'}), 400
+
     try:
-        # yt-dlpコマンドを実行して動画または音声のダウンロード
-        command = ["yt-dlp", "--format", format, "--get-url", video_url]
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        download_url = result.stdout.strip()
+        # ダウンロード先のファイルパスを作成
+        output_path = f"downloads/{media_type.capitalize()}/{os.path.basename(video_url)}"
 
-        # ダウンロードしたメディアを一時的なファイルに保存
-        temp_filename = f"temp.{output_format}"
-        subprocess.run(["yt-dlp", "--format", format, "--output", temp_filename, video_url], check=True)
+        # yt-dlpを使用してメディアをダウンロード
+        if media_type == 'video':
+            options = {'format': 'bestvideo+bestaudio/best/mp4', 'merge_output_format': 'mp4', 'embed-thumbnail': True}
+        elif media_type == 'audio':
+            options = {'format': 'bestaudio/best', 'extractaudio': True, 'audioformat': 'mp3', 'embed-thumbnail': True, 'addmetadata': True}
+        else:
+            return jsonify({'error': 'Invalid media type. Supported types are "video" and "audio".'}), 400
 
-        return temp_filename
-    except subprocess.CalledProcessError as e:
-        return None
+        media_file = download_media(video_url, output_path, options)
 
-@app.route('/download', methods=['GET'])
-def download():
-    video_url = request.args.get('video_url')
-    format = request.args.get('format')
-    output_format = request.args.get('output_format', 'mp4')  # デフォルトはmp4
-
-    if not video_url or not format:
-        return jsonify({"error": "video_urlとformatは必須です。"})
-
-    # メディアのダウンロード
-    temp_filename = download_media(video_url, format, output_format)
-
-    if temp_filename:
-        try:
-            # ダウンロードしたメディアをユーザーに提供
-            return send_file(temp_filename, as_attachment=True, download_name=f"download.{output_format}")
-        finally:
-            # 一時ファイルを削除
-            os.remove(temp_filename)
-    else:
-        return jsonify({"error": "メディアのダウンロードに失敗しました。"})
+        # ダウンロードしたメディアファイルをそのまま提供
+        return send_file(media_file, as_attachment=True)
+    
+    except Exception as e:
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
-
+    app.run(debug=True)
