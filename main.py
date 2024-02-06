@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/download', methods=['GET'])
+@app.route('/', methods=['GET'])
 def download_media():
     media_url = request.args.get('url')
     media_type = request.args.get('type')  # 'audio' or 'video'
