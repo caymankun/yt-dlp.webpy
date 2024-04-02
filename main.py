@@ -79,12 +79,15 @@ def handle_request():
 def send_file_or_return_error(file_path, media_type):
     if os.path.exists(file_path):  # ファイルが存在するか確認
         if media_type == 'video':
-            response = make_response(send_file(file_path, attachment_filename=os.path.basename(file_path)))
-            return response
+            with open(file_path, 'rb') as f:
+                response = make_response(f.read())
+                response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+                return response
         else:
             return send_file(file_path, as_attachment=True)
     else:
         return jsonify({'error': 'Downloaded file not found'})
+
 
 
 if __name__ == '__main__':
