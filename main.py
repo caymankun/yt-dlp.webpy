@@ -37,7 +37,7 @@ def download_media(media_url, media_type):
         elif media_type == 'video':
             ydl_opts = {
                 'format': 'best',
-                'outtmpl': os.path.join(temp_dir, '%(title)s.webm'),
+                'outtmpl': os.path.join(temp_dir, '%(title)s.mp4'),
                 'embed-thumbnail': True,
                 'add-metadata': True,
             }
@@ -80,11 +80,13 @@ def handle_request():
 def send_file_or_return_error(file_path, media_type):
     if os.path.exists(file_path):  # ファイルが存在するか確認
         if media_type == 'video':
-            return send_file(file_path, as_attachment=True)
+            response = make_response(send_file(file_path, attachment_filename=os.path.basename(file_path)))
+            return response
         else:
-            return send_file(file_path, as_attachment=True, attachment_filename=os.path.basename(file_path))
+            return send_file(file_path, as_attachment=True)
     else:
         return jsonify({'error': 'Downloaded file not found'})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
