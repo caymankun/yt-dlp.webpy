@@ -48,7 +48,11 @@ def download_media(media_url, media_type):
             ydl.download([media_url])
 
         # ダウンロードされたファイルのパスを取得
-        file_path = os.path.join(temp_dir, os.listdir(temp_dir)[0])
+        downloaded_files = [f for f in os.listdir(temp_dir) if os.path.isfile(os.path.join(temp_dir, f))]
+        if len(downloaded_files) == 0:
+            return jsonify({'error': 'Downloaded file not found'}), 404
+        else:
+            file_path = os.path.join(temp_dir, downloaded_files[0])
 
         return file_path
 
@@ -63,7 +67,7 @@ def handle_request():
         media_type = request.args.get('type')
         file_path_or_error = download_media(media_url, media_type)
         if isinstance(file_path_or_error, str):
-            return send_file_or_convert_to_mp3(file_path_or_error, media_type)
+            return send_file(file_path_or_error, as_attachment=True)
         else:
             return file_path_or_error
     elif request.method == 'POST':
@@ -73,25 +77,9 @@ def handle_request():
         media_type = data.get('type')
         file_path_or_error = download_media(media_url, media_type)
         if isinstance(file_path_or_error, str):
-            return send_file_or_convert_to_mp3(file_path_or_error, media_type)
+            return send_file(file_path_or_error, as_attachment=True)
         else:
             return file_path_or_error
 
-def send_file_or_convert_to_mp3(file_path, media_type):
-    if media_type == 'video':
-        mp3_path = convert_to_mp3(file_path)
-        if isinstance(mp3_path, str):
-            response = make_response(send_file(mp3_path))
-            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(mp3_path)}'
-            return response
-        else:
-            return mp3_path
-    else:
-        response = make_response(send_file(file_path))
-        response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
-        return response
-
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
-
