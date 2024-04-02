@@ -23,7 +23,7 @@ def download_media(media_url, media_type):
             }
         elif media_type == 'video':
             ydl_opts = {
-                'format': 'bestvideo+bestaudio',
+                'format': 'bestvideo+bestaudio`',
                 'outtmpl': '/tmp/%(title)s.mp4',
                 'embed-thumbnail': True,
                 'add-metadata': True,
