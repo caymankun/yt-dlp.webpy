@@ -32,18 +32,20 @@ def download_media(media_url, media_type):
                 'format': 'bestaudio/best',
                 'x': True,
                 'audioformat': 'mp3',
-                'outtmpl': os.path.join(temp_dir, '%(title)s.mp3'),
+                'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
                 'embed-thumbnail': True,
                 'add-metadata': True,
                 'N': 20,
+                'ffmpeg_location': 'https://apis.caymankun.f5.si/cgi-bin/ffmpeg',
             }
         elif media_type == 'video':
             ydl_opts = {
-                'format': 'bestvideo/best',
-                'outtmpl': os.path.join(temp_dir, '%(title)s.mp4'),
+                'format': 'bestvideo+bestaudio',
+                'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
                 'embed-thumbnail': True,
                 'add-metadata': True,
                 'N': 20,
+                'ffmpeg_location': 'https://apis.caymankun.f5.si/cgi-bin/ffmpeg',
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
@@ -58,34 +60,6 @@ def download_media(media_url, media_type):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-# ffmpegバイナリをダウンロードする関数
-def download_ffmpeg_binary():
-    try:
-        ffmpeg_url = "https://apis.caymankun.f5.si/cgi-bin/ffmpeg"
-        ffmpeg_path = "./ffmpeg"  # ダウンロード先のパス
-        response = requests.get(ffmpeg_url, stream=True)
-        if response.status_code == 200:
-            with open(ffmpeg_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=1024):
-                    f.write(chunk)
-            os.chmod(ffmpeg_path, 0o755)  # 実行権限を付与
-            return ffmpeg_path
-        else:
-            return None
-    except Exception as e:
-        print(f"An error occurred while downloading ffmpeg binary: {e}")
-        return None
-
-# ffmpegバイナリをダウンロードするエンドポイント
-@app.route('/install_ffmpeg', methods=['GET'])
-def install_ffmpeg():
-    ffmpeg_path = download_ffmpeg_binary()
-    if ffmpeg_path:
-        return jsonify({'success': f'ffmpeg binary downloaded and saved at {ffmpeg_path}'})
-    else:
-        return jsonify({'error': 'Failed to download ffmpeg binary'}), 500
-    
 
 @app.route('/', methods=['GET', 'POST'])
 def handle_request():
