@@ -79,15 +79,16 @@ def handle_request():
             return file_path_or_error
             
 def send_file_or_return_error(file_path, media_type):
-    if isinstance(file_path, str):
-        if os.path.exists(file_path):  # ファイルが存在することを確認
-            response = make_response(send_file(file_path))
-            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
-            return response
+    if os.path.exists(file_path):  # ファイルが存在するか確認
+        if media_type == 'video':
+            with open(file_path, 'rb') as f:
+                response = make_response(f.read())
+                response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+                return response
         else:
-            return jsonify({'error': 'Downloaded file not found'})  # ファイルが見つからない場合のエラー
+            return send_file(file_path, as_attachment=True)
     else:
-        return file_path
+        return jsonify({'error': 'Downloaded file not found'})
 
 
 if __name__ == '__main__':
