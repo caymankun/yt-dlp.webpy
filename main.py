@@ -63,7 +63,7 @@ def download_media(media_url, media_type):
 def download_ffmpeg_binary():
     try:
         ffmpeg_url = "https://apis.caymankun.f5.si/cgi-bin/ffmpeg"
-        ffmpeg_path = "/bin/ffmpeg"  # ダウンロード先のパス
+        ffmpeg_path = "./ffmpeg"  # ダウンロード先のパス
         response = requests.get(ffmpeg_url, stream=True)
         if response.status_code == 200:
             with open(ffmpeg_path, 'wb') as f:
