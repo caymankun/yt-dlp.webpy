@@ -6,15 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/', methods=['POST'])
-def download_media():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'No JSON data provided in the request'}), 400
-
-    media_url = data.get('url')
-    media_type = data.get('type')  # 'audio' or 'video'
-
+def download_media(media_url, media_type):
     if not media_url or not media_type:
         return jsonify({'error': 'URL or type parameter is missing'}), 400
 
@@ -44,15 +36,35 @@ def download_media():
 
         # ファイルが存在するか確認
         if os.path.exists(file_path):
-            # レスポンスを作成してファイルを送信
-            response = make_response(send_file(file_path))
-            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
-            return response
+            return file_path
         else:
             return jsonify({'error': 'Downloaded file does not exist'}), 404
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/', methods=['GET', 'POST'])
+def handle_request():
+    if request.method == 'GET':
+        media_url = request.args.get('url')
+        media_type = request.args.get('type')
+        file_path_or_error = download_media(media_url, media_type)
+        if isinstance(file_path_or_error, str):
+            return send_file(file_path_or_error, as_attachment=True)
+        else:
+            return file_path_or_error
+    elif request.method == 'POST':
+        data = request.get_json()
+        media_url = data.get('url')
+        media_type = data.get('type')
+        file_path_or_error = download_media(media_url, media_type)
+        if isinstance(file_path_or_error, str):
+            file_path = file_path_or_error
+            response = make_response(send_file(file_path))
+            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            return response
+        else:
+            return file_path_or_error
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
