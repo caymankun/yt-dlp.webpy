@@ -9,7 +9,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "cors": "^2.8.5",
-    "yt-dlp": "^2024.03.10",
+    "ytdl-core": "^4.11.5",
     "uuid": "^8.3.2"
   }
 }
