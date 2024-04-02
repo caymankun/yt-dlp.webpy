@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
 from datetime import datetime
 import yt_dlp
@@ -44,11 +44,14 @@ def download_media():
             ydl.download([media_url])
 
         file_path = f'/tmp/{output_file_name}.{media_type}'
-        return send_file(file_path, as_attachment=True, attachment_filename=f'{output_file_name}.{media_type}')
+
+        # レスポンスを作成してファイルを送信
+        response = make_response(send_file(file_path))
+        response.headers['Content-Disposition'] = f'attachment; filename={output_file_name}.{media_type}'
+        return response
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
-
