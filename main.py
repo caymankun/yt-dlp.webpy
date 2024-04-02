@@ -97,7 +97,8 @@ def send_audio_file_or_return_error(file_path):
 
 def send_video_file_or_return_error(file_path):
     if os.path.exists(file_path):  # ファイルが存在するか確認
-        response = make_response(send_file(file_path, attachment_filename=os.path.basename(file_path)))
+        response = send_file(file_path)
+        response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
         return response
     else:
         return jsonify({'error': 'Downloaded video file not found'})
