@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
-from datetime import datetime
 import yt_dlp
 import os
 
@@ -20,35 +19,37 @@ def download_media():
         return jsonify({'error': 'URL or type parameter is missing'}), 400
 
     try:
-        now = datetime.now()
-        formatted_now = now.strftime('%Y%m%d%H%M%S')
-        output_file_name = f'output_{formatted_now}'
-
         if media_type == 'audio':
             ydl_opts = {
-                'format': '22',
-                'outtmpl': f'/tmp/{output_file_name}.mp3',
+                'format': 'bestaudio/best',
+                'extractaudio': True,
+                'audioformat': 'mp3',
+                'outtmpl': '/tmp/%(title)s.%(ext)s',
                 'embed-thumbnail': True,
                 'add-metadata': True,
             }
         elif media_type == 'video':
             ydl_opts = {
-                'format': '22',
-                'outtmpl': f'/tmp/{output_file_name}.mp4',
+                'format': 'best',
+                'outtmpl': '/tmp/%(title)s.%(ext)s',
                 'embed-thumbnail': True,
+                'add-metadata': True,
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([media_url])
+            info = ydl.extract_info(media_url, download=True)
+            file_path = ydl.prepare_filename(info)
 
-        file_path = f'/tmp/{output_file_name}.{media_type}'
-
-        # レスポンスを作成してファイルを送信
-        response = make_response(send_file(file_path))
-        response.headers['Content-Disposition'] = f'attachment; filename={output_file_name}.{media_type}'
-        return response
+        # ファイルが存在するか確認
+        if os.path.exists(file_path):
+            # レスポンスを作成してファイルを送信
+            response = make_response(send_file(file_path))
+            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            return response
+        else:
+            return jsonify({'error': 'Downloaded file does not exist'}), 404
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
