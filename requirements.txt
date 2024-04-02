@@ -1,7 +1,0 @@
-flask
-yt-dlp
-flask-cors
-gunicorn
-ffmpeg
-ffmpeg-python
-requests
