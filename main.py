@@ -62,24 +62,18 @@ def download_media(media_url, media_type):
 def install_ffmpeg():
     try:
         ffmpeg_url = "https://apis.caymankun.f5.si/cgi-bin/ffmpeg"
-        response = requests.get(ffmpeg_url)
-        if response.status_code == 200:
-            # ダウンロードしたバイナリを保存するパス
-            ffmpeg_path = './ffmpeg'  # 任意のパスに設定してください
+        # ダウンロードしたバイナリを保存するパス
+        ffmpeg_path = '/usr/local/bin/ffmpeg'  # 任意のパスに設定してください
 
-            # バイナリをファイルに書き込む
-            with open(ffmpeg_path, 'wb') as f:
-                f.write(response.content)
+        # コマンドを実行してffmpegをダウンロードする
+        subprocess.run(['wget', ffmpeg_url, '-O', ffmpeg_path])
+        # 実行権限を付与
+        os.chmod(ffmpeg_path, 0o755)
 
-            # 実行権限を付与
-            os.chmod(ffmpeg_path, 0o755)
+        # PATHに追加
+        os.environ['PATH'] += os.pathsep + os.path.dirname(ffmpeg_path)
 
-            # PATHに追加
-            os.environ['PATH'] += os.pathsep + os.path.dirname(ffmpeg_path)
-
-            return jsonify({'message': 'ffmpeg installed successfully'})
-        else:
-            return jsonify({'error': 'Failed to download ffmpeg'}), 500
+        return jsonify({'message': 'ffmpeg installed successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
