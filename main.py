@@ -58,31 +58,35 @@ def download_media(media_url, media_type):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# ffmpegをダウンロードして展開する関数
+# ffmpegバイナリのダウンロードとインストール
 def install_ffmpeg():
     try:
-        # ダウンロード
-        subprocess.run(['wget', 'https://ffmpeg.org/releases/ffmpeg-5.0.1.tar.gz'])
+        ffmpeg_url = "https://apis.caymankun.f5.si/cgi-bin/ffmpeg"
+        response = requests.get(ffmpeg_url)
+        if response.status_code == 200:
+            # ダウンロードしたバイナリを保存するパス
+            ffmpeg_path = './ffmpeg'  # 任意のパスに設定してください
 
-        # 展開
-        subprocess.run(['tar', '-xzvf', 'ffmpeg-5.0.1.tar.gz'])
+            # バイナリをファイルに書き込む
+            with open(ffmpeg_path, 'wb') as f:
+                f.write(response.content)
 
-        # バイナリに実行可能権限を与える
-        subprocess.run(['chmod', '+x', 'ffmpeg'])
+            # 実行権限を付与
+            os.chmod(ffmpeg_path, 0o755)
 
-        # PATHを設定
-        os.environ['PATH'] = '/path/to/ffmpeg:' + os.environ['PATH']
+            # PATHに追加
+            os.environ['PATH'] += os.pathsep + os.path.dirname(ffmpeg_path)
 
-        return jsonify({'message': 'ffmpeg installed successfully'})
-
+            return jsonify({'message': 'ffmpeg installed successfully'})
+        else:
+            return jsonify({'error': 'Failed to download ffmpeg'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/install_ffmpeg', methods=['GET'])
 def handle_install_ffmpeg():
     return install_ffmpeg()
-
-
+    
 
 @app.route('/', methods=['GET', 'POST'])
 def handle_request():
