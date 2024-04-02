@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const ytDlp = require('yt-dlp');
+const ytdl = require('ytdl-core');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -26,27 +26,17 @@ const downloadMedia = async (mediaUrl, mediaType) => {
 
     try {
         const options = {
+            quality: 'highest',
+            filter: mediaType === 'audio' ? 'audioonly' : 'videoandaudio',
+            format: mediaType === 'audio' ? 'mp3' : 'mp4',
             cwd: tempDir,
-            output: '%(title)s.%(ext)s',
-            ffmpeg_location: 'https://apis.caymankun.f5.si/cgi-bin/ffmpeg',
-            embed_thumbnail: true,
-            add_metadata: true,
         };
 
-        if (mediaType === 'audio') {
-            options.format = 'bestaudio/best';
-            options.audioformat = 'mp3';
-        } else if (mediaType === 'video') {
-            options.format = 'bestvideo+bestaudio';
-        } else {
-            throw new Error('Invalid media type');
-        }
+        const videoInfo = await ytdl.getInfo(mediaUrl);
+        const videoTitle = videoInfo.videoDetails.title;
+        const filePath = path.join(tempDir, `${videoTitle}.${options.format}`);
 
-        const result = await ytDlp(mediaUrl, options);
-
-        // ダウンロードされたファイルのパスを取得
-        const filePath = path.join(tempDir, result.files[0].filename);
-
+        await ytdl.downloadFromInfo(videoInfo, options);
         return filePath;
     } catch (error) {
         throw new Error(`Failed to download media: ${error}`);
