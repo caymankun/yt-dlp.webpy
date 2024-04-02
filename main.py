@@ -59,7 +59,20 @@ def download_media(media_url, media_type):
 def handle_request():
     if request.method == 'GET':
         # GETリクエストの処理
-        pass
+        media_url = request.args.get('url')
+        media_type = request.args.get('type')
+        file_path_or_error = download_media(media_url, media_type)
+        if isinstance(file_path_or_error, str):
+            if media_type == 'video':
+                mp3_path = convert_to_mp3(file_path_or_error)
+                if isinstance(mp3_path, str):
+                    return send_file(mp3_path, as_attachment=True)
+                else:
+                    return mp3_path
+            else:
+                return send_file(file_path_or_error, as_attachment=True)
+        else:
+            return file_path_or_error
     elif request.method == 'POST':
         # POSTリクエストの処理
         data = request.get_json()
@@ -67,24 +80,22 @@ def handle_request():
         media_type = data.get('type')
         file_path_or_error = download_media(media_url, media_type)
         if isinstance(file_path_or_error, str):
-            # ダウンロード成功時の処理
-            file_path = file_path_or_error
-            response = make_response(send_file(file_path))
-            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
-
-            # ダウンロード後、一時ディレクトリを一定時間後に削除する
-            def delayed_cleanup():
-                time.sleep(600)  # 10分待機
-                cleanup_temp_directory(temp_dir)
-
-            temp_dir = os.path.dirname(file_path)
-            cleanup_thread = threading.Thread(target=delayed_cleanup)
-            cleanup_thread.start()
-
-            return response
+            if media_type == 'video':
+                mp3_path = convert_to_mp3(file_path_or_error)
+                if isinstance(mp3_path, str):
+                    response = make_response(send_file(mp3_path))
+                    response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(mp3_path)}'
+                    return response
+                else:
+                    return mp3_path
+            else:
+                file_path = file_path_or_error
+                response = make_response(send_file(file_path))
+                response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+                return response
         else:
-            # エラー発生時の処理
             return file_path_or_error
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
