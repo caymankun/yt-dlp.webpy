@@ -18,6 +18,7 @@ def download_media(media_url, media_type):
                 'outtmpl': '/tmp/%(title)s.mp3',
                 'embed-thumbnail': True,
                 'add-metadata': True,
+                'N': 10,
             }
         elif media_type == 'video':
             ydl_opts = {
@@ -25,6 +26,7 @@ def download_media(media_url, media_type):
                 'outtmpl': '/tmp/%(title)s.mp4',
                 'embed-thumbnail': True,
                 'add-metadata': True,
+                'N': 10,
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
