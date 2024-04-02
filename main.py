@@ -58,6 +58,32 @@ def download_media(media_url, media_type):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ffmpegをダウンロードして展開する関数
+def install_ffmpeg():
+    try:
+        # ダウンロード
+        subprocess.run(['wget', 'https://ffmpeg.org/releases/ffmpeg-5.0.1.tar.gz'])
+
+        # 展開
+        subprocess.run(['tar', '-xzvf', 'ffmpeg-5.0.1.tar.gz'])
+
+        # バイナリに実行可能権限を与える
+        subprocess.run(['chmod', '+x', 'ffmpeg'])
+
+        # PATHを設定
+        os.environ['PATH'] = '/path/to/ffmpeg:' + os.environ['PATH']
+
+        return jsonify({'message': 'ffmpeg installed successfully'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/install_ffmpeg', methods=['GET'])
+def handle_install_ffmpeg():
+    return install_ffmpeg()
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def handle_request():
     if request.method == 'GET':
