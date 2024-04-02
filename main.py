@@ -33,14 +33,13 @@ def download_media(media_url, media_type):
                 'outtmpl': os.path.join(temp_dir, '%(title)s.mp3'),
                 'embed-thumbnail': True,
                 'add-metadata': True,
-                'N': 10,
             }
         elif media_type == 'video':
             ydl_opts = {
+                'format': 'best',
                 'outtmpl': os.path.join(temp_dir, '%(title)s.mp4'),
                 'embed-thumbnail': True,
                 'add-metadata': True,
-                'N': 10,
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
@@ -77,19 +76,15 @@ def handle_request():
             return send_file_or_return_error(file_path_or_error, media_type)
         else:
             return file_path_or_error
-            
+
 def send_file_or_return_error(file_path, media_type):
     if os.path.exists(file_path):  # ファイルが存在するか確認
         if media_type == 'video':
-            with open(file_path, 'rb') as f:
-                response = make_response(f.read())
-                response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
-                return response
-        else:
             return send_file(file_path, as_attachment=True)
+        else:
+            return send_file(file_path, as_attachment=True, attachment_filename=os.path.basename(file_path))
     else:
         return jsonify({'error': 'Downloaded file not found'})
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
