@@ -132,7 +132,7 @@ def set_ffmpeg_path(ffmpeg_url):
         return False
 
 # ffmpegのバイナリのパスを設定するエンドポイント
-@app.route('/set_ffmpeg_path', methods=['POST'])
+@app.route('/ffmpeg', methods=['POST'])
 def set_ffmpeg_path_endpoint():
     global ffmpeg_binary_path
     data = request.get_json()
