@@ -80,15 +80,13 @@ def handle_request():
 def send_file_or_return_error(file_path, media_type):
     if os.path.exists(file_path):  # ファイルが存在するか確認
         if media_type == 'video':
-            response = make_response(send_file(file_path))
-            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            response = make_response(send_file(file_path, attachment_filename=os.path.basename(file_path)))
             return response
         else:
-            response = make_response(send_file(file_path))
-            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
-            return response
+            return send_file(file_path, as_attachment=True)
     else:
         return jsonify({'error': 'Downloaded file not found'})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
