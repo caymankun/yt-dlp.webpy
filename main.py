@@ -107,5 +107,41 @@ def send_video_file_or_return_error(file_path):
     else:
         return jsonify({'error': 'Downloaded video file not found'})
 
+
+
+# ffmpegのバイナリのパス
+ffmpeg_binary_path = "/usr/bin/ffmpeg"  # デフォルトのパス
+
+# ffmpegのバイナリをダウンロードしてパスを設定する関数
+def set_ffmpeg_path(ffmpeg_url):
+    global ffmpeg_binary_path
+    try:
+        response = requests.get(ffmpeg_url, stream=True)
+        if response.status_code == 200:
+            # ダウンロードしたバイナリを保存
+            with open(ffmpeg_binary_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    f.write(chunk)
+            # 実行権限を付与
+            os.chmod(ffmpeg_binary_path, 0o755)
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"An error occurred while downloading ffmpeg binary: {e}")
+        return False
+
+# ffmpegのバイナリのパスを設定するエンドポイント
+@app.route('/set_ffmpeg_path', methods=['POST'])
+def set_ffmpeg_path_endpoint():
+    global ffmpeg_binary_path
+    data = request.get_json()
+    ffmpeg_url = "https://apis.caymankun.f5.si/cgi-bin/ffmpeg"
+    if set_ffmpeg_path(ffmpeg_url):
+        return jsonify({'success': 'ffmpeg binary path set successfully'}), 200
+    else:
+        return jsonify({'error': 'Failed to download or set ffmpeg binary'}), 500
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
