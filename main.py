@@ -27,6 +27,7 @@ def download_media(media_url, media_type):
                 'outtmpl': '/tmp/%(title)s.mp4',
                 'embed-thumbnail': True,
                 'add-metadata': True,
+                'ffmpeg-location ': './ffmpeg',
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
