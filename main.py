@@ -1,12 +1,26 @@
+import os
+import requests
+import subprocess
 from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
-import yt_dlp
-import os
-import subprocess
 import ffmpeg
 
 app = Flask(__name__)
 CORS(app)
+
+def download_ffmpeg():
+    ffmpeg_url = 'https://apis.caymankun.f5.si/bin/ffmpeg'
+    ffmpeg_path = './ffmpeg'
+
+    # ffmpegをダウンロード
+    response = requests.get(ffmpeg_url)
+    with open(ffmpeg_path, 'wb') as f:
+        f.write(response.content)
+
+    # ffmpegの実行権限を付与
+    os.chmod(ffmpeg_path, 0o755)
+
+    return ffmpeg_path
 
 def download_media(media_url, media_type):
     if not media_url or not media_type:
@@ -28,7 +42,6 @@ def download_media(media_url, media_type):
                 'outtmpl': '/tmp/%(title)s.mp4',
                 'embed-thumbnail': True,
                 'add-metadata': True,
-                'ffmpeg_location': 'https://apis.caymankun.f5.si/cgi-bin/ffmpeg',
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
@@ -44,14 +57,6 @@ def download_media(media_url, media_type):
             return jsonify({'error': 'Downloaded file does not exist'}), 404
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-def convert_to_mp3(video_path):
-    try:
-        mp3_path = os.path.splitext(video_path)[0] + '.mp3'
-        subprocess.run(['ffmpeg', '-i', video_path, '-vn', '-ar', '44100', '-ac', '2', '-ab', '192k', mp3_path], check=True)
-        return mp3_path
-    except subprocess.CalledProcessError as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/', methods=['GET', 'POST'])
@@ -94,4 +99,8 @@ def handle_request():
             return file_path_or_error
 
 if __name__ == '__main__':
+    # ffmpegのダウンロードと実行権の付与
+    ffmpeg_path = download_ffmpeg()
+    os.environ["PATH"] += os.pathsep + os.path.dirname(ffmpeg_path)
+
     app.run(host='0.0.0.0', port=8080)
