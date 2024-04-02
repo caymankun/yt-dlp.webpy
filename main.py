@@ -77,10 +77,11 @@ def handle_request():
             return send_file_or_return_error(file_path_or_error, media_type)
         else:
             return file_path_or_error
-
+            
 def send_file_or_return_error(file_path, media_type):
     if isinstance(file_path, str):
-        response = make_response(send_file(file_path, attachment_filename=os.path.basename(file_path)))
+        response = make_response(send_file(file_path))
+        response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
         return response
     else:
         return file_path
