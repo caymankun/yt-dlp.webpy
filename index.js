@@ -3,14 +3,14 @@ const cors = require('cors');
 const ytdl = require('ytdl-core');
 const fs = require('fs');
 const path = require('path');
-const { nanoid } = require('nanoid');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(cors());
 
 // 一時ディレクトリを作成する関数
 const createTempDirectory = () => {
-    const tempDir = path.join('/tmp', nanoid());
+    const tempDir = path.join('/tmp', uuidv4());
     fs.mkdirSync(tempDir, { recursive: true });
     return tempDir;
 }
@@ -47,12 +47,16 @@ app.get('/', async (req, res) => {
     const { url, type } = req.query;
 
     try {
+        if (type !== 'audio' && type !== 'video') {
+            throw new Error('Invalid media type. Please specify "audio" or "video".');
+        }
+
         const filePath = await downloadMedia(url, type);
         res.download(filePath, () => {
             cleanupTempDirectory(path.dirname(filePath));
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
