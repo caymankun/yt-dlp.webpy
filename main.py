@@ -24,10 +24,11 @@ def download_media(media_url, media_type):
             }
         elif media_type == 'video':
             ydl_opts = {
-                'format': 'best',
+                'format': 'bestvideo+bestaudio',
                 'outtmpl': '/tmp/%(title)s.%(ext)s',
                 'embed-thumbnail': True,
                 'add-metadata': True,
+                'ffmpeg-location' : 'https://apis.caymankun.f5.si/bin/ffmpeg',
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
