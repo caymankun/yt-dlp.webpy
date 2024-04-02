@@ -135,12 +135,12 @@ def set_ffmpeg_path(ffmpeg_url):
 @app.route('/ffmpeg', methods=['GET'])
 def set_ffmpeg_path_endpoint():
     global ffmpeg_binary_path
-    data = request.get_json()
     ffmpeg_url = "https://apis.caymankun.f5.si/cgi-bin/ffmpeg"
     if set_ffmpeg_path(ffmpeg_url):
         return jsonify({'success': 'ffmpeg binary path set successfully'}), 200
     else:
         return jsonify({'error': 'Failed to download or set ffmpeg binary'}), 500
+
 
 
 if __name__ == '__main__':
