@@ -65,7 +65,12 @@ def handle_request():
         media_type = request.args.get('type')
         file_path_or_error = download_media(media_url, media_type)
         if isinstance(file_path_or_error, str):
-            return send_file_or_return_error(file_path_or_error, media_type)
+            if media_type == 'audio':
+                return send_audio_file_or_return_error(file_path_or_error)
+            elif media_type == 'video':
+                return send_video_file_or_return_error(file_path_or_error)
+            else:
+                return jsonify({'error': 'Invalid media type'}), 400
         else:
             return file_path_or_error
     elif request.method == 'POST':
@@ -75,20 +80,27 @@ def handle_request():
         media_type = data.get('type')
         file_path_or_error = download_media(media_url, media_type)
         if isinstance(file_path_or_error, str):
-            return send_file_or_return_error(file_path_or_error, media_type)
+            if media_type == 'audio':
+                return send_audio_file_or_return_error(file_path_or_error)
+            elif media_type == 'video':
+                return send_video_file_or_return_error(file_path_or_error)
+            else:
+                return jsonify({'error': 'Invalid media type'}), 400
         else:
             return file_path_or_error
 
-def send_file_or_return_error(file_path, media_type):
+def send_audio_file_or_return_error(file_path):
     if os.path.exists(file_path):  # ファイルが存在するか確認
-        if media_type == 'video':
-            response = make_response(send_file(file_path))
-            return response
-        else:
-            return send_file(file_path, as_attachment=True)
+        return send_file(file_path, as_attachment=True)
     else:
-        return jsonify({'error': 'Downloaded file not found'})
+        return jsonify({'error': 'Downloaded audio file not found'})
 
+def send_video_file_or_return_error(file_path):
+    if os.path.exists(file_path):  # ファイルが存在するか確認
+        response = make_response(send_file(file_path, attachment_filename=os.path.basename(file_path)))
+        return response
+    else:
+        return jsonify({'error': 'Downloaded video file not found'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
