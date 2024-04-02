@@ -30,14 +30,14 @@ def download_media(media_url, media_type):
                 'format': 'bestaudio/best',
                 'extractaudio': True,
                 'audioformat': 'mp3',
-                'outtmpl': os.path.join(temp_dir, '%(title)s.mp3'),
+                'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),  # 拡張子を含めて出力ファイル名を指定
                 'embed-thumbnail': True,
                 'add-metadata': True,
             }
         elif media_type == 'video':
             ydl_opts = {
                 'format': 'best',
-                'outtmpl': os.path.join(temp_dir, '%(title)s.mp4'),
+                'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),  # 拡張子を含めて出力ファイル名を指定
                 'embed-thumbnail': True,
                 'add-metadata': True,
             }
@@ -47,12 +47,18 @@ def download_media(media_url, media_type):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([media_url])
 
-        # ダウンロードされたファイルのパスを取得
+        # ダウンロードされたファイルの拡張子を取得
         downloaded_files = [f for f in os.listdir(temp_dir) if os.path.isfile(os.path.join(temp_dir, f))]
-        if len(downloaded_files) == 0:
-            return jsonify({'error': 'Downloaded file not found'}), 404
-        else:
-            file_path = os.path.join(temp_dir, downloaded_files[0])
+        valid_extensions = ['.mp3', '.mp4']  # 有効な拡張子を定義
+        file_path = None
+        for f in downloaded_files:
+            _, ext = os.path.splitext(f)
+            if ext in valid_extensions:
+                file_path = os.path.join(temp_dir, f)
+                break
+
+        if file_path is None:
+            return jsonify({'error': 'Downloaded file not found or invalid extension'}), 404
 
         return file_path
 
