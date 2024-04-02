@@ -4,6 +4,7 @@ import time
 import random
 import string
 import subprocess
+import requests
 from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
 import yt_dlp
@@ -58,28 +59,32 @@ def download_media(media_url, media_type):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# ffmpegバイナリのダウンロードとインストール
-def install_ffmpeg():
+# ffmpegバイナリをダウンロードする関数
+def download_ffmpeg_binary():
     try:
         ffmpeg_url = "https://apis.caymankun.f5.si/cgi-bin/ffmpeg"
-        # ダウンロードしたバイナリを保存するパス
-        ffmpeg_path = '/usr/local/bin/ffmpeg'  # 任意のパスに設定してください
-
-        # コマンドを実行してffmpegをダウンロードする
-        subprocess.run(['wget', ffmpeg_url, '-O', ffmpeg_path])
-        # 実行権限を付与
-        os.chmod(ffmpeg_path, 0o755)
-
-        # PATHに追加
-        os.environ['PATH'] += os.pathsep + os.path.dirname(ffmpeg_path)
-
-        return jsonify({'message': 'ffmpeg installed successfully'})
+        ffmpeg_path = "/bin/ffmpeg"  # ダウンロード先のパス
+        response = requests.get(ffmpeg_url, stream=True)
+        if response.status_code == 200:
+            with open(ffmpeg_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    f.write(chunk)
+            os.chmod(ffmpeg_path, 0o755)  # 実行権限を付与
+            return ffmpeg_path
+        else:
+            return None
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"An error occurred while downloading ffmpeg binary: {e}")
+        return None
 
+# ffmpegバイナリをダウンロードするエンドポイント
 @app.route('/install_ffmpeg', methods=['GET'])
-def handle_install_ffmpeg():
-    return install_ffmpeg()
+def install_ffmpeg():
+    ffmpeg_path = download_ffmpeg_binary()
+    if ffmpeg_path:
+        return jsonify({'success': f'ffmpeg binary downloaded and saved at {ffmpeg_path}'})
+    else:
+        return jsonify({'error': 'Failed to download ffmpeg binary'}), 500
     
 
 @app.route('/', methods=['GET', 'POST'])
