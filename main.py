@@ -24,8 +24,8 @@ def download_media(media_url, media_type):
             }
         elif media_type == 'video':
             ydl_opts = {
-                'format': '22/17/18',
-                'outtmpl': '/tmp/%(title)s.mp4',
+                'format': 'best',
+                'outtmpl': '/tmp/%(title)s.%(ext)s',
                 'embed-thumbnail': True,
                 'add-metadata': True,
             }
