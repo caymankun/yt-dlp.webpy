@@ -14,7 +14,6 @@ def download_media(media_url, media_type):
     try:
         if media_type == 'audio':
             ydl_opts = {
-                'format': 'bestaudio/best',
                 'extractaudio': True,
                 'audioformat': 'mp3',
                 'outtmpl': '/tmp/%(title)s.mp3',
@@ -23,7 +22,6 @@ def download_media(media_url, media_type):
             }
         elif media_type == 'video':
             ydl_opts = {
-                'format': 'best',
                 'outtmpl': '/tmp/%(title)s.mp4',
                 'embed-thumbnail': True,
                 'add-metadata': True,
