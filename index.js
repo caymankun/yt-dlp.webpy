@@ -3,14 +3,14 @@ const cors = require('cors');
 const ytdl = require('ytdl-core');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const { nanoid } = require('nanoid');
 
 const app = express();
 app.use(cors());
 
 // 一時ディレクトリを作成する関数
 const createTempDirectory = () => {
-    const tempDir = path.join(__dirname, 'tmp', uuidv4());
+    const tempDir = path.join('/tmp', nanoid());
     fs.mkdirSync(tempDir, { recursive: true });
     return tempDir;
 }
@@ -28,13 +28,12 @@ const downloadMedia = async (mediaUrl, mediaType) => {
         const options = {
             quality: 'highest',
             filter: mediaType === 'audio' ? 'audioonly' : 'videoandaudio',
-            format: mediaType === 'audio' ? 'mp3' : 'mp4',
             cwd: tempDir,
         };
 
         const videoInfo = await ytdl.getInfo(mediaUrl);
         const videoTitle = videoInfo.videoDetails.title;
-        const filePath = path.join(tempDir, `${videoTitle}.${options.format}`);
+        const filePath = path.join(tempDir, `${videoTitle}.${mediaType === 'audio' ? 'mp3' : 'mp4'}`);
 
         await ytdl.downloadFromInfo(videoInfo, options);
         return filePath;
