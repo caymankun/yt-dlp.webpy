@@ -28,7 +28,7 @@ def download_media(media_url, media_type):
                 'outtmpl': '/tmp/%(title)s.mp4',
                 'embed-thumbnail': True,
                 'add-metadata': True,
-                'ffmpeg_location': 'https://apis.caymankun.f5.si/bin/ffmpeg',
+                'ffmpeg_location': 'https://apis.caymankun.f5.si/cgi-bin/ffmpeg',
             }
         else:
             return jsonify({'error': 'Invalid media type'}), 400
