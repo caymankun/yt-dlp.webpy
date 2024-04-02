@@ -17,14 +17,14 @@ def download_media(media_url, media_type):
                 'format': 'bestaudio/best',
                 'extractaudio': True,
                 'audioformat': 'mp3',
-                'outtmpl': '/tmp/%(title)s.%(ext)s',
+                'outtmpl': '/tmp/%(title)s.mp3',
                 'embed-thumbnail': True,
                 'add-metadata': True,
             }
         elif media_type == 'video':
             ydl_opts = {
                 'format': 'best',
-                'outtmpl': '/tmp/%(title)s.%(ext)s',
+                'outtmpl': '/tmp/%(title)s.mp4',
                 'embed-thumbnail': True,
                 'add-metadata': True,
             }
