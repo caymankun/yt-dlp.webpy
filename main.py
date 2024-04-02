@@ -13,6 +13,7 @@ CORS(app)
 # 一時ディレクトリを作成する関数
 def create_temp_directory():
     temp_dir = '/tmp/' + ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    os.makedirs(temp_dir)
     return temp_dir
 
 # 一時ディレクトリを削除する関数
@@ -53,8 +54,6 @@ def download_media(media_url, media_type):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    finally:
-        cleanup_temp_directory(temp_dir)  # 一時ディレクトリを削除
 
 @app.route('/', methods=['GET', 'POST'])
 def handle_request():
@@ -64,7 +63,7 @@ def handle_request():
         media_type = request.args.get('type')
         file_path_or_error = download_media(media_url, media_type)
         if isinstance(file_path_or_error, str):
-            return send_file_or_convert_to_mp3(file_path_or_error, media_type)
+            return send_file_or_return_error(file_path_or_error, media_type)
         else:
             return file_path_or_error
     elif request.method == 'POST':
@@ -74,23 +73,22 @@ def handle_request():
         media_type = data.get('type')
         file_path_or_error = download_media(media_url, media_type)
         if isinstance(file_path_or_error, str):
-            return send_file_or_convert_to_mp3(file_path_or_error, media_type)
+            return send_file_or_return_error(file_path_or_error, media_type)
         else:
             return file_path_or_error
 
-def send_file_or_convert_to_mp3(file_path, media_type):
-    if media_type == 'video':
-        mp3_path = convert_to_mp3(file_path)
-        if isinstance(mp3_path, str):
-            response = make_response(send_file(mp3_path))
-            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(mp3_path)}'
+def send_file_or_return_error(file_path, media_type):
+    if os.path.exists(file_path):  # ファイルが存在するか確認
+        if media_type == 'video':
+            response = make_response(send_file(file_path))
+            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
             return response
         else:
-            return mp3_path
+            response = make_response(send_file(file_path))
+            response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            return response
     else:
-        response = make_response(send_file(file_path))
-        response.headers['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
-        return response
+        return jsonify({'error': 'Downloaded file not found'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
