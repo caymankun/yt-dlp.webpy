@@ -7,10 +7,14 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['POST'])
 def download_media():
-    media_url = request.args.get('url')
-    media_type = request.args.get('type')  # 'audio' or 'video'
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No JSON data provided in the request'}), 400
+
+    media_url = data.get('url')
+    media_type = data.get('type')  # 'audio' or 'video'
 
     if not media_url or not media_type:
         return jsonify({'error': 'URL or type parameter is missing'}), 400
@@ -47,3 +51,4 @@ def download_media():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
+
