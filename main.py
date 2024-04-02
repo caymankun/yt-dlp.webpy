@@ -82,7 +82,7 @@ def handle_request():
 def send_file_or_return_error(file_path, media_type):
     if os.path.exists(file_path):  # ファイルが存在するか確認
         if media_type == 'video':
-            response = make_response(send_file(file_path, attachment_filename=os.path.basename(file_path)))
+            response = make_response(send_file(file_path))
             return response
         else:
             return send_file(file_path, as_attachment=True)
