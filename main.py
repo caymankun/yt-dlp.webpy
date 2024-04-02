@@ -3,6 +3,7 @@ import shutil
 import time
 import random
 import string
+import subprocess
 from flask import Flask, request, jsonify, send_file, make_response
 from flask_cors import CORS
 import yt_dlp
@@ -28,7 +29,7 @@ def download_media(media_url, media_type):
         if media_type == 'audio':
             ydl_opts = {
                 'format': 'bestaudio/best',
-                'extractaudio': True,
+                'x': True,
                 'audioformat': 'mp3',
                 'outtmpl': os.path.join(temp_dir, '%(title)s.mp3'),
                 'embed-thumbnail': True,
