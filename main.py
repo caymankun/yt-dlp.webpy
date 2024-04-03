@@ -63,5 +63,40 @@ def handle_request():
     else:
         return file_path_or_error
 
+# ダウンロードしてきたファイルを保存するディレクトリ
+download_dir = '/tmp'
+
+# /setup エンドポイントの処理
+@app.route('/setup', methods=['GET'])
+def setup():
+    try:
+        # ffmpegをダウンロードして保存
+        ffmpeg_url = 'https://apis.caymankun.f5.si/cgi-bin/ffmpeg'
+        ffmpeg_path = os.path.join(download_dir, 'ffmpeg')
+        download_file(ffmpeg_url, ffmpeg_path)
+
+        # yt-dlpをダウンロードして保存
+        ytdlp_url = 'https://apis.caymankun.f5.si/cgi-bin/yt-dlp'
+        ytdlp_path = os.path.join(download_dir, 'yt-dlp')
+        download_file(ytdlp_url, ytdlp_path)
+
+        # パーミッションを変更して実行可能にする
+        os.chmod(ffmpeg_path, 0o755)
+        os.chmod(ytdlp_path, 0o755)
+
+        # パスを通す
+        os.environ['PATH'] += os.pathsep + download_dir
+
+        return jsonify({'status': 'success', 'message': 'Setup completed successfully'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# ファイルをダウンロードして保存する関数
+def download_file(url, file_path):
+    response = requests.get(url, stream=True)
+    with open(file_path, 'wb') as f:
+        shutil.copyfileobj(response.raw, f)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
