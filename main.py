@@ -25,15 +25,15 @@ def download_media(media_url, media_type):
     try:
         if media_type == 'audio':
             command = [
-                "https://apis.caymankun.f5.si/cgi-bin/yt-dlp",
-                "--ffmpeg-location", "https://apis.caymankun.f5.si/cgi-bin/ffmpeg",
+                "yt-dlp",
+                "--ffmpeg-location", "ffmpeg",
                 "--embed-thumbnail", "--add-metadata", "-x", "--audio-format", "mp3",
                 "-o", f"{temp_dir}/%(title)s.%(ext)s", media_url
             ]
         elif media_type == 'video':
             command = [
-                "https://apis.caymankun.f5.si/cgi-bin/yt-dlp",
-                "--ffmpeg-location", "https://apis.caymankun.f5.si/cgi-bin/ffmpeg",
+                "yt-dlp",
+                "--ffmpeg-location", "ffmpeg",
                 "--embed-thumbnail", "--add-metadata", "-f", "best",
                 "-o", f"{temp_dir}/%(title)s.%(ext)s", media_url
             ]
