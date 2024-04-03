@@ -17,6 +17,7 @@ def get_url():
     # タイプに応じてyt-dlpのオプションを設定
     ydl_opts = {'format': 'best'}
     if media_type == 'audio':
+        ydl_opts['format'] = 'bestaudio'
         ydl_opts['extract_audio'] = True
 
     # yt-dlpを使用してURLを取得
@@ -39,6 +40,7 @@ def get_url_json():
     # タイプに応じてyt-dlpのオプションを設定
     ydl_opts = {'format': 'best'}
     if media_type == 'audio':
+        ydl_opts['format'] = 'bestaudio'
         ydl_opts['extract_audio'] = True
 
     # yt-dlpを使用してURLを取得
@@ -61,6 +63,7 @@ def play_media():
     # タイプに応じてyt-dlpのオプションを設定
     ydl_opts = {'format': 'best'}
     if media_type == 'audio':
+        ydl_opts['format'] = 'bestaudio'
         ydl_opts['extract_audio'] = True
 
     # yt-dlpを使用してURLを取得
@@ -72,6 +75,7 @@ def play_media():
             return send_file(media_url, mimetype=media_type)
         else:
             return 'URL not found in result', 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
