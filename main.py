@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, send_file
 
 app = Flask(__name__)
 
@@ -7,37 +7,70 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def get_url():
     url = request.args.get('url')
+    media_type = request.args.get('type')
 
-    # パラメーターがない場合はエラーメッセージを返す
+    # URLパラメーターがない場合はエラーメッセージを返す
     if not url:
         return "URL parameter is required", 400
 
-    # yt-dlpの--get-urlオプションを使用してURLを取得するコマンドを作成
-    command = "yt-dlp --get-url " + url
+    # タイプに応じてyt-dlpのオプションを設定
+    if media_type == 'audio':
+        command = "yt-dlp --get-url --audio-format mp3 " + url
+    elif media_type == 'video':
+        command = "yt-dlp --get-url " + url
+    else:
+        return "Invalid media type", 400
 
-    # コマンドを実行し、結果を取得
+    # コマンドを実行してURLを取得
     result = os.popen(command).read().strip()
 
-    # 結果を返す
+    # URLを返す
     return result
 
 # /json エンドポイントでのGETリクエストを処理する
 @app.route('/json', methods=['GET'])
-def get_json_url():
+def get_url_json():
     url = request.args.get('url')
+    media_type = request.args.get('type')
 
-    # パラメーターがない場合はエラーメッセージを返す
+    # URLパラメーターがない場合はエラーメッセージを返す
     if not url:
-        return jsonify({'error': 'URL parameter is required'}), 400
+        return jsonify({"error": "URL parameter is required"}), 400
 
-    # yt-dlpの--get-urlオプションを使用してURLを取得するコマンドを作成
-    command = "yt-dlp --get-url " + url
+    # タイプに応じてyt-dlpのオプションを設定
+    if media_type == 'audio':
+        command = "yt-dlp --get-url --audio-format mp3 " + url
+    elif media_type == 'video':
+        command = "yt-dlp --get-url " + url
+    else:
+        return jsonify({"error": "Invalid media type"}), 400
 
-    # コマンドを実行し、結果を取得
+    # コマンドを実行してURLを取得
     result = os.popen(command).read().strip()
 
-    # 結果をJSON形式で返す
-    return jsonify({'url': result})
+    # URLをJSON形式で返す
+    return jsonify({"url": result})
+
+# /e エンドポイントでのGETリクエストを処理する
+@app.route('/e', methods=['GET'])
+def play_media():
+    url = request.args.get('url')
+    media_type = request.args.get('type')
+
+    # URLパラメーターがない場合はエラーメッセージを返す
+    if not url:
+        return "URL parameter is required", 400
+
+    # タイプに応じてyt-dlpのオプションを設定
+    if media_type == 'audio':
+        command = "yt-dlp --audio-format mp3 -o - " + url
+    elif media_type == 'video':
+        command = "yt-dlp -o - " + url
+    else:
+        return "Invalid media type", 400
+
+    # コマンドを実行してファイルをストリーミング再生
+    return send_file(os.popen(command), mimetype='audio/mpeg' if media_type == 'audio' else 'video/mp4')
 
 if __name__ == '__main__':
     app.run(debug=True)
