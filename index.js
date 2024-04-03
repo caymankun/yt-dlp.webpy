@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-const ytdl = require('ytdl-core');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { exec } = require('child_process');
+const ytdlp = require('yt-dlp-wrap');
 
 const app = express();
 app.use(cors());
@@ -26,16 +27,19 @@ const downloadMedia = async (mediaUrl, mediaType) => {
 
     try {
         const options = {
-            filter: 'audioandvideo', // オーディオとビデオの両方をダウンロード
-            format: mediaType === 'audio' ? 'mp3' : 'mp4', // ダウンロードするフォーマットを指定
-            cwd: tempDir,
+            format: mediaType === 'audio' ? 'bestaudio/best' : 'bestvideo+bestaudio',
+            output: path.join(tempDir, '%(title)s.%(ext)s'),
+            embedThumbnail: true,
+            addMetadata: true,
+            noPlaylist: true,
         };
 
-        const videoInfo = await ytdl.getInfo(mediaUrl, options);
-        const videoTitle = videoInfo.videoDetails.title;
-        const filePath = path.join(tempDir, `${videoTitle}.${mediaType === 'audio' ? 'mp3' : 'mp4'}`);
+        await ytdlp.download(mediaUrl, options);
 
-        await ytdl.downloadFromInfo(videoInfo, options);
+        // ダウンロードされたファイルのパスを取得
+        const files = fs.readdirSync(tempDir);
+        const filePath = path.join(tempDir, files[0]);
+
         return filePath;
     } catch (error) {
         throw new Error(`Failed to download media: ${error}`);
