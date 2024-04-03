@@ -23,7 +23,7 @@ def get_url():
     # コマンドを実行し、結果を取得
     result = os.popen(command).read().strip()
 
-    # 結果をJSON形式で返す
+    # 結果を返す
     return result
 
 # /json エンドポイントでのGETリクエストを処理する
