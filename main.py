@@ -85,4 +85,4 @@ def get_url():
             return 'URL not found in result', 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
