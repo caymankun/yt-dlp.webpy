@@ -26,7 +26,7 @@ def get_url():
         if 'url' in result:
             media_url = result['url']
             # ファイルを直接返して、適切なContent-Typeを設定する
-            return send_file(media_url, mimetype=media_type)
+            return media_url
         else:
             return 'URL not found in result', 500
 
