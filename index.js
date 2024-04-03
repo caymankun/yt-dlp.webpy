@@ -17,7 +17,7 @@ const createTempDirectory = () => {
 
 // 一時ディレクトリを削除する関数
 const cleanupTempDirectory = (tempDir) => {
-    fs.rmdirSync(tempDir, { recursive: true });
+    fs.rmSync(tempDir, { recursive: true });
 }
 
 // 動画をダウンロードする関数
