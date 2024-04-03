@@ -25,7 +25,7 @@ def get_url():
         result = ydl.extract_info(url, download=False)
         if 'url' in result:
             media_url = result['url']
-            # URLを直接返して、適切なContent-Typeを設定する
+            # ファイルを直接返して、適切なContent-Typeを設定する
             return send_file(media_url, mimetype=media_type)
         else:
             return 'URL not found in result', 500
@@ -54,7 +54,7 @@ def get_url_json():
             return jsonify({"error": "URL not found in result"}), 500
 
 @app.route('/e', methods=['GET'])
-def play_media():
+def get_url():
     url = request.args.get('url')
     media_type = request.args.get('type')
 
@@ -73,11 +73,16 @@ def play_media():
         result = ydl.extract_info(url, download=False)
         if 'url' in result:
             media_url = result['url']
-            # URLを直接返して、適切なContent-Typeを設定する
-            return send_file(media_url, mimetype=media_type)
+            # HTMLを直接返す
+            if media_type == 'audio':
+                html_content = f"<audio controls><source src='{media_url}' type='audio/mpeg'></audio>"
+            elif media_type == 'video':
+                html_content = f"<video controls><source src='{media_url}' type='video/mp4'></video>"
+            else:
+                return "Unsupported media type", 400
+            return html_content
         else:
             return 'URL not found in result', 500
-
 
 if __name__ == '__main__':
     app.run(debug=True)
