@@ -24,7 +24,7 @@ def get_url():
     result = os.popen(command).read().strip()
 
     # 結果をJSON形式で返す
-    return jsonify({'url': result})
+    return result
 
 # /json エンドポイントでのGETリクエストを処理する
 @app.route('/json', methods=['GET'])
