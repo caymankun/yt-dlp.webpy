@@ -15,7 +15,7 @@ def get_url():
         return "URL parameter is required", 400
 
     # タイプに応じてyt-dlpのオプションを設定
-    ydl_opts = {'format': 'best'}
+    ydl_opts = {'format': 'best' ,'no_cache': True}
     if media_type == 'audio':
         ydl_opts['format'] = 'bestaudio'
         ydl_opts['extract_audio'] = True
@@ -40,7 +40,7 @@ def get_url_json():
         return jsonify({"error": "URL parameter is required"}), 400
 
     # タイプに応じてyt-dlpのオプションを設定
-    ydl_opts = {'format': 'best'}
+    ydl_opts = {'format': 'best' ,'no_cache': True}
     if media_type == 'audio':
         ydl_opts['format'] = 'bestaudio'
         ydl_opts['extract_audio'] = True
@@ -63,7 +63,7 @@ def get_url():
         return "URL parameter is required", 400
 
     # タイプに応じてyt-dlpのオプションを設定
-    ydl_opts = {'format': 'best'}
+    ydl_opts = {'format': 'best' ,'no_cache': True}
     if media_type == 'audio':
         ydl_opts['format'] = 'bestaudio'
         ydl_opts['extract_audio'] = True
