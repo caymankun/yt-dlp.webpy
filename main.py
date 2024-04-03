@@ -24,13 +24,23 @@ def download_media(media_url, media_type):
 
     try:
         if media_type == 'audio':
-            command = f"https://apis.caymankun.f5.si/cgi-bin/yt-dlp --ffmpeg-location https://apis.caymankun.f5.si/cgi-bin/ffmpeg --embed-thumbnail --add-metadata -x --audio-format mp3 -o '{temp_dir}/%(title)s.%(ext)s' {media_url}"
+            command = [
+                "https://apis.caymankun.f5.si/cgi-bin/yt-dlp",
+                "--ffmpeg-location", "https://apis.caymankun.f5.si/cgi-bin/ffmpeg",
+                "--embed-thumbnail", "--add-metadata", "-x", "--audio-format", "mp3",
+                "-o", f"{temp_dir}/%(title)s.%(ext)s", media_url
+            ]
         elif media_type == 'video':
-            command = f"https://apis.caymankun.f5.si/cgi-bin/yt-dlp --ffmpeg-location https://apis.caymankun.f5.si/cgi-bin/ffmpeg --embed-thumbnail --add-metadata -f best -o '{temp_dir}/%(title)s.%(ext)s' {media_url}"
+            command = [
+                "https://apis.caymankun.f5.si/cgi-bin/yt-dlp",
+                "--ffmpeg-location", "https://apis.caymankun.f5.si/cgi-bin/ffmpeg",
+                "--embed-thumbnail", "--add-metadata", "-f", "best",
+                "-o", f"{temp_dir}/%(title)s.%(ext)s", media_url
+            ]
         else:
             return jsonify({'error': 'Invalid media type'}), 400
 
-        subprocess.run(command, shell=True, check=True)
+        subprocess.run(command, check=True)
 
         # ダウンロードされたファイルのパスを取得
         file_path = os.path.join(temp_dir, os.listdir(temp_dir)[0])
@@ -39,6 +49,7 @@ def download_media(media_url, media_type):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 # メディアファイルをダウンロードしてクライアントに送信するエンドポイント
 @app.route('/', methods=['GET'])
