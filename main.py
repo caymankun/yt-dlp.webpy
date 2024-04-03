@@ -24,9 +24,9 @@ def download_media(media_url, media_type):
 
     try:
         if media_type == 'audio':
-            command = f"yt-dlp --embed-thumbnail --add-metadata -x --audio-format mp3 -o '{temp_dir}/%(title)s.%(ext)s' {media_url}"
+            command = f"https://apis.caymankun.f5.si/cgi-bin/yt-dlp --ffmpeg-location https://apis.caymankun.f5.si/cgi-bin/ffmpeg --embed-thumbnail --add-metadata -x --audio-format mp3 -o '{temp_dir}/%(title)s.%(ext)s' {media_url}"
         elif media_type == 'video':
-            command = f"yt-dlp --embed-thumbnail --add-metadata -f best -o '{temp_dir}/%(title)s.%(ext)s' {media_url}"
+            command = f"https://apis.caymankun.f5.si/cgi-bin/yt-dlp --ffmpeg-location https://apis.caymankun.f5.si/cgi-bin/ffmpeg --embed-thumbnail --add-metadata -f best -o '{temp_dir}/%(title)s.%(ext)s' {media_url}"
         else:
             return jsonify({'error': 'Invalid media type'}), 400
 
