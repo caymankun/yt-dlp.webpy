@@ -17,7 +17,7 @@ const createTempDirectory = () => {
 
 // 一時ディレクトリを削除する関数
 const cleanupTempDirectory = (tempDir) => {
-    fs.rmSync(tempDir, { recursive: true });
+    fs.rmdirSync(tempDir, { recursive: true });
 }
 
 // 動画をダウンロードする関数
@@ -26,12 +26,12 @@ const downloadMedia = async (mediaUrl, mediaType) => {
 
     try {
         const options = {
-            quality: 'highest',
-            filter: mediaType === 'audio' ? 'audioonly' : 'videoandaudio',
+            filter: 'audioandvideo', // オーディオとビデオの両方をダウンロード
+            format: mediaType === 'audio' ? 'mp3' : 'mp4', // ダウンロードするフォーマットを指定
             cwd: tempDir,
         };
 
-        const videoInfo = await ytdl.getInfo(mediaUrl);
+        const videoInfo = await ytdl.getInfo(mediaUrl, options);
         const videoTitle = videoInfo.videoDetails.title;
         const filePath = path.join(tempDir, `${videoTitle}.${mediaType === 'audio' ? 'mp3' : 'mp4'}`);
 
@@ -46,17 +46,17 @@ const downloadMedia = async (mediaUrl, mediaType) => {
 app.get('/', async (req, res) => {
     const { url, type } = req.query;
 
-    try {
-        if (type !== 'audio' && type !== 'video') {
-            throw new Error('Invalid media type. Please specify "audio" or "video".');
-        }
+    if (!url || !type || (type !== 'audio' && type !== 'video')) {
+        return res.status(400).json({ error: 'Invalid or missing parameters. Please specify "url" and "type" as either "audio" or "video".' });
+    }
 
+    try {
         const filePath = await downloadMedia(url, type);
         res.download(filePath, () => {
             cleanupTempDirectory(path.dirname(filePath));
         });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
