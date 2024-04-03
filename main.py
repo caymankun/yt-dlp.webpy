@@ -54,7 +54,7 @@ def get_url_json():
             return jsonify({"error": "URL not found in result"}), 500
 
 @app.route('/e', methods=['GET'])
-def get_url():
+def get_embedded_media():
     url = request.args.get('url')
     media_type = request.args.get('type')
 
