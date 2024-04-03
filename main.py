@@ -1,16 +1,11 @@
 import os
 import shutil
-import time
 import random
 import string
 import subprocess
-import requests
-from flask import Flask, request, jsonify, send_file, make_response
-from flask_cors import CORS
-import yt_dlp
+from flask import Flask, request, jsonify, send_file
 
 app = Flask(__name__)
-CORS(app)
 
 # 一時ディレクトリを作成する関数
 def create_temp_directory():
@@ -22,81 +17,40 @@ def create_temp_directory():
 def cleanup_temp_directory(temp_dir):
     shutil.rmtree(temp_dir)
 
-# 動画ファイルを送信する関数
-def send_video_file_or_return_error(file_path):
-    if os.path.exists(file_path):
-        return send_file(file_path, as_attachment=True)
-    else:
-        return jsonify({'error': 'Downloaded video file not found'})
+# ffmpegのパスを設定する関数
+def set_ffmpeg_path():
+    ffmpeg_path = 'https://apis.caymankun.f5.si/cgi-bin/ffmpeg'  # ffmpegのバイナリのパスを設定
+    os.environ['PATH'] += os.pathsep + os.path.dirname(ffmpeg_path)
 
-# yt-dlpを使用してメディアをダウンロードする関数
+# 動画または音声をダウンロードする関数
 def download_media(media_url, media_type):
     temp_dir = create_temp_directory()  # 一時ディレクトリを作成
 
     try:
-        if media_type == 'audio':
-            ydl_opts = {
-                'format': 'bestaudio/best',
-                'x': True,
-                'audioformat': 'mp3',
-                'outtmpl': os.path.join(temp_dir, '%(title)s.mp3'),
-                'embed-thumbnail': True,
-                'add-metadata': True,
-                'N': 20,
-            }
-        elif media_type == 'video':
-            ydl_opts = {
-                'format': 'bestvideo/best',
-                'outtmpl': os.path.join(temp_dir, '%(title)s.mp4'),
-                'embed-thumbnail': True,
-                'add-metadata': True,
-                'N': 20,
-            }
-        else:
-            return jsonify({'error': 'Invalid media type'}), 400
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([media_url])
-
-        # ダウンロードされたファイルのパスを取得
-        file_path = os.path.join(temp_dir, os.listdir(temp_dir)[0])
-
+        file_path = os.path.join(temp_dir, 'media')  # ファイル名はそのままにする
+        # yt-dlpのコマンドをsubprocessで実行して動画または音声をダウンロード
+        subprocess.run(['yt-dlp', '--format', 'bestvideo+bestaudio' if media_type == 'video' else 'bestaudio', '-o', file_path, media_url], check=True)
+        
         return file_path
 
+    except subprocess.CalledProcessError as e:
+        return str(e), 500
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return str(e), 500
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def handle_request():
-    if request.method == 'GET':
-        # GETリクエストの処理
-        media_url = request.args.get('url')
-        media_type = request.args.get('type')
-        file_path_or_error = download_media(media_url, media_type)
-        if isinstance(file_path_or_error, str):
-            if media_type == 'audio':
-                return send_file(file_path_or_error, as_attachment=True)
-            elif media_type == 'video':
-                return send_video_file_or_return_error(file_path_or_error)
-            else:
-                return jsonify({'error': 'Invalid media type'}), 400
-        else:
-            return file_path_or_error
-    elif request.method == 'POST':
-        # POSTリクエストの処理
-        data = request.get_json()
-        media_url = data.get('url')
-        media_type = data.get('type')
-        file_path_or_error = download_media(media_url, media_type)
-        if isinstance(file_path_or_error, str):
-            if media_type == 'audio':
-                return send_file(file_path_or_error, as_attachment=True)
-            elif media_type == 'video':
-                return send_video_file_or_return_error(file_path_or_error)
-            else:
-                return jsonify({'error': 'Invalid media type'}), 400
-        else:
-            return file_path_or_error
+    media_url = request.args.get('url')
+    media_type = request.args.get('type')
+    if not media_url or not media_type:
+        return jsonify({'error': 'URL or type parameter is missing'}), 400
+
+    file_path_or_error = download_media(media_url, media_type)
+    if isinstance(file_path_or_error, str):
+        return jsonify({'error': file_path_or_error}), 500
+    else:
+        return send_file(file_path_or_error)
 
 if __name__ == '__main__':
+    set_ffmpeg_path()
     app.run(host='0.0.0.0', port=8080)
