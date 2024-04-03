@@ -24,7 +24,9 @@ def get_url():
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         result = ydl.extract_info(url, download=False)
         if 'url' in result:
-            return result['url']
+            media_url = result['url']
+            # URLを直接返して、適切なContent-Typeを設定する
+            return send_file(media_url, mimetype=media_type)
         else:
             return 'URL not found in result', 500
 
