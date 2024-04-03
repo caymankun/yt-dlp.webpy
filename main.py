@@ -1,71 +1,102 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const { exec } = require('child_process');
-const ytdlp = require('yt-dlp-wrap');
+import os
+import shutil
+import time
+import random
+import string
+import subprocess
+import requests
+from flask import Flask, request, jsonify, send_file, make_response
+from flask_cors import CORS
+import yt_dlp
 
-const app = express();
-app.use(cors());
+app = Flask(__name__)
+CORS(app)
 
-// 一時ディレクトリを作成する関数
-const createTempDirectory = () => {
-    const tempDir = path.join('/tmp', uuidv4());
-    fs.mkdirSync(tempDir, { recursive: true });
-    return tempDir;
-}
+# 一時ディレクトリを作成する関数
+def create_temp_directory():
+    temp_dir = '/tmp/' + ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    os.makedirs(temp_dir)
+    return temp_dir
 
-// 一時ディレクトリを削除する関数
-const cleanupTempDirectory = (tempDir) => {
-    fs.rmdirSync(tempDir, { recursive: true });
-}
+# 一時ディレクトリを削除する関数
+def cleanup_temp_directory(temp_dir):
+    shutil.rmtree(temp_dir)
 
-// 動画をダウンロードする関数
-const downloadMedia = async (mediaUrl, mediaType) => {
-    const tempDir = createTempDirectory();
+# 動画ファイルを送信する関数
+def send_video_file_or_return_error(file_path):
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True)
+    else:
+        return jsonify({'error': 'Downloaded video file not found'})
 
-    try {
-        const options = {
-            format: mediaType === 'audio' ? 'bestaudio/best' : 'bestvideo+bestaudio',
-            output: path.join(tempDir, '%(title)s.%(ext)s'),
-            embedThumbnail: true,
-            addMetadata: true,
-            noPlaylist: true,
-        };
+# yt-dlpを使用してメディアをダウンロードする関数
+def download_media(media_url, media_type):
+    temp_dir = create_temp_directory()  # 一時ディレクトリを作成
 
-        await ytdlp.download(mediaUrl, options);
+    try:
+        if media_type == 'audio':
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'x': True,
+                'audioformat': 'mp3',
+                'outtmpl': os.path.join(temp_dir, '%(title)s.mp3'),
+                'embed-thumbnail': True,
+                'add-metadata': True,
+                'N': 20,
+            }
+        elif media_type == 'video':
+            ydl_opts = {
+                'format': 'bestvideo/best',
+                'outtmpl': os.path.join(temp_dir, '%(title)s.mp4'),
+                'embed-thumbnail': True,
+                'add-metadata': True,
+                'N': 20,
+            }
+        else:
+            return jsonify({'error': 'Invalid media type'}), 400
 
-        // ダウンロードされたファイルのパスを取得
-        const files = fs.readdirSync(tempDir);
-        const filePath = path.join(tempDir, files[0]);
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([media_url])
 
-        return filePath;
-    } catch (error) {
-        throw new Error(`Failed to download media: ${error}`);
-    }
-}
+        # ダウンロードされたファイルのパスを取得
+        file_path = os.path.join(temp_dir, os.listdir(temp_dir)[0])
 
-// GETリクエストの処理
-app.get('/', async (req, res) => {
-    const { url, type } = req.query;
+        return file_path
 
-    if (!url || !type || (type !== 'audio' && type !== 'video')) {
-        return res.status(400).json({ error: 'Invalid or missing parameters. Please specify "url" and "type" as either "audio" or "video".' });
-    }
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-    try {
-        const filePath = await downloadMedia(url, type);
-        res.download(filePath, () => {
-            cleanupTempDirectory(path.dirname(filePath));
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+@app.route('/', methods=['GET', 'POST'])
+def handle_request():
+    if request.method == 'GET':
+        # GETリクエストの処理
+        media_url = request.args.get('url')
+        media_type = request.args.get('type')
+        file_path_or_error = download_media(media_url, media_type)
+        if isinstance(file_path_or_error, str):
+            if media_type == 'audio':
+                return send_file(file_path_or_error, as_attachment=True)
+            elif media_type == 'video':
+                return send_video_file_or_return_error(file_path_or_error)
+            else:
+                return jsonify({'error': 'Invalid media type'}), 400
+        else:
+            return file_path_or_error
+    elif request.method == 'POST':
+        # POSTリクエストの処理
+        data = request.get_json()
+        media_url = data.get('url')
+        media_type = data.get('type')
+        file_path_or_error = download_media(media_url, media_type)
+        if isinstance(file_path_or_error, str):
+            if media_type == 'audio':
+                return send_file(file_path_or_error, as_attachment=True)
+            elif media_type == 'video':
+                return send_video_file_or_return_error(file_path_or_error)
+            else:
+                return jsonify({'error': 'Invalid media type'}), 400
+        else:
+            return file_path_or_error
 
-// サーバーを起動
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080)
