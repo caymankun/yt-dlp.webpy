@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 
 app = Flask(__name__)
 
@@ -7,22 +7,13 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def get_url():
     url = request.args.get('url')
-    media_type = request.args.get('type')
 
     # パラメーターがない場合はエラーメッセージを返す
     if not url:
-        return jsonify({'error': 'URL parameter is required'}), 400
+        return "URL parameter is required", 400
 
     # yt-dlpの--get-urlオプションを使用してURLを取得するコマンドを作成
-    command = "yt-dlp --get-url"
-
-    # タイプが指定されていれば、適切なフォーマットオプションを追加する
-    if media_type == 'audio':
-        command += " -f bestaudio"
-    elif media_type == 'video':
-        command += " -f bestvideo"
-
-    command += " " + url
+    command = "yt-dlp --get-url " + url
 
     # コマンドを実行し、結果を取得
     result = os.popen(command).read().strip()
@@ -34,22 +25,13 @@ def get_url():
 @app.route('/json', methods=['GET'])
 def get_json_url():
     url = request.args.get('url')
-    media_type = request.args.get('type')
 
     # パラメーターがない場合はエラーメッセージを返す
     if not url:
         return jsonify({'error': 'URL parameter is required'}), 400
 
     # yt-dlpの--get-urlオプションを使用してURLを取得するコマンドを作成
-    command = "yt-dlp --get-url"
-    
-    # タイプが指定されていれば、適切なフォーマットオプションを追加する
-    if media_type == 'audio':
-        command += " -f bestaudio"
-    elif media_type == 'video':
-        command += " -f bestvideo"
-
-    command += " " + url
+    command = "yt-dlp --get-url " + url
 
     # コマンドを実行し、結果を取得
     result = os.popen(command).read().strip()
