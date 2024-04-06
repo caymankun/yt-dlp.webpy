@@ -99,7 +99,7 @@ def get_ogp_json():
         else:
             return jsonify({"error": "URL not found in result"}), 500
 
-@app.route('/dbt/', methods=['GET', 'POST'])
+@app.route('/dbt', methods=['GET', 'POST'])
 def get_ogp_json():
     if request.method == 'POST':
         data = request.get_json()
