@@ -5,10 +5,15 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def get_url():
-    url = request.args.get('url')
-    media_type = request.args.get('type')
+    if request.method == 'POST':
+        data = request.get_json()
+        url = data.get('url')
+        media_type = data.get('type')
+    else:
+        url = request.args.get('url')
+        media_type = request.args.get('type')
 
     # URLパラメーターがない場合はエラーメッセージを返す
     if not url:
@@ -30,10 +35,15 @@ def get_url():
         else:
             return 'URL not found in result', 500
 
-@app.route('/json', methods=['GET'])
+@app.route('/json', methods=['GET', 'POST'])
 def get_url_json():
-    url = request.args.get('url')
-    media_type = request.args.get('type')
+    if request.method == 'POST':
+        data = request.get_json()
+        url = data.get('url')
+        media_type = data.get('type')
+    else:
+        url = request.args.get('url')
+        media_type = request.args.get('type')
 
     # URLパラメーターがない場合はエラーメッセージを返す
     if not url:
@@ -53,10 +63,15 @@ def get_url_json():
         else:
             return jsonify({"error": "URL not found in result"}), 500
 
-@app.route('/ogp', methods=['GET'])
+@app.route('/ogp', methods=['GET', 'POST'])
 def get_ogp_json():
-    url = request.args.get('url')
-    media_type = request.args.get('type')
+    if request.method == 'POST':
+        data = request.get_json()
+        url = data.get('url')
+        media_type = data.get('type')
+    else:
+        url = request.args.get('url')
+        media_type = request.args.get('type')
 
     # URLパラメーターがない場合はエラーメッセージを返す
     if not url:
@@ -84,10 +99,15 @@ def get_ogp_json():
         else:
             return jsonify({"error": "URL not found in result"}), 500
 
-@app.route('/e', methods=['GET'])
+@app.route('/e', methods=['GET', 'POST'])
 def get_embedded_media():
-    url = request.args.get('url')
-    media_type = request.args.get('type')
+    if request.method == 'POST':
+        data = request.get_json()
+        url = data.get('url')
+        media_type = data.get('type')
+    else:
+        url = request.args.get('url')
+        media_type = request.args.get('type')
 
     # URLパラメーターがない場合はエラーメッセージを返す
     if not url:
