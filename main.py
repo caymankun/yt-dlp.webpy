@@ -95,6 +95,7 @@ def get_ogp_json():
                 "title": title,
                 "description": description,
                 "author": uploader,
+                "mediatype": media_type,
                 "author_url": uploader_url
             }
             return jsonify(response_data)
