@@ -90,10 +90,12 @@ def get_ogp_json():
             video_url = result['url']
             thumbnail = result.get('thumbnail')
             title = result.get('title')
+            description = result.get('description', '')[:100]  # descriptionを取得し、最大100文字までに制限する
             response_data = {
                 "url": video_url,
                 "thumbnail": thumbnail,
-                "title": title
+                "title": title,
+                "description": description
             }
             return jsonify(response_data)
         else:
