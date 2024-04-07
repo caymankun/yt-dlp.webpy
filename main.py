@@ -63,15 +63,10 @@ def get_url_json():
         else:
             return jsonify({"error": "URL not found in result"}), 500
 
-@app.route('/ogp', methods=['GET', 'POST'])
+@app.route('/ogp', methods=['GET'])
 def get_ogp_json():
-    if request.method == 'POST':
-        data = request.get_json()
-        url = data.get('url')
-        media_type = data.get('type')
-    else:
-        url = request.args.get('url')
-        media_type = request.args.get('type')
+    url = request.args.get('url')
+    media_type = request.args.get('type')
 
     # URLパラメーターがない場合はエラーメッセージを返す
     if not url:
@@ -83,28 +78,28 @@ def get_ogp_json():
         ydl_opts['format'] = 'bestaudio'
         ydl_opts['extract_audio'] = True
 
-# yt-dlpを使用してURLを取得
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    result = ydl.extract_info(url, download=False)
-    if 'url' in result:
-        video_url = result['url']
-        thumbnail = result.get('thumbnail')
-        title = result.get('title')
-        description = result.get('description', '')[:100]  # descriptionを取得し、最大100文字までに制限する
-        uploader = result.get('uploader')
-        uploader_url = result.get('uploader_url')
+    # yt-dlpを使用してURLを取得
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        result = ydl.extract_info(url, download=False)
+        if 'url' in result:
+            video_url = result['url']
+            thumbnail = result.get('thumbnail')
+            title = result.get('title')
+            description = result.get('description', '')[:100]  # descriptionを取得し、最大100文字までに制限する
+            uploader = result.get('uploader')
+            uploader_url = result.get('uploader_url')
 
-        response_data = {
-            "url": video_url,
-            "thumbnail": thumbnail,
-            "title": title,
-            "description": description,
-            "author": uploader,
-            "author_url": uploader_url
-        }
-        return jsonify(response_data)
-    else:
-        return jsonify({"error": "URL not found in result"}), 500
+            response_data = {
+                "url": video_url,
+                "thumbnail": thumbnail,
+                "title": title,
+                "description": description,
+                "author": uploader,
+                "author_url": uploader_url
+            }
+            return jsonify(response_data)
+        else:
+            return jsonify({"error": "URL not found in result"}), 500
 
 @app.route('/e', methods=['GET', 'POST'])
 def get_embedded_media():
