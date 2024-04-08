@@ -145,6 +145,7 @@ def get_embedded_media():
 # beta api
 
 import hmac
+import hashlib
 
 PUBLIC_KEY = os.getenv('PUBLIC_KEY')
 CLIENT_ID = os.getenv('CLIENT_ID')
