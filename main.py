@@ -151,9 +151,7 @@ DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 @app.route('/interactions', methods=['POST'])
 def interactions():
     data = request.json
-    
-
-    if not verify_key(request.headers.get('X-Signature-Ed25519'), str(request.headers.get('X-Signature-Timestamp')), request.data, PUBLIC_KEY):
+if not verify_key(request.headers.get('X-Signature-Ed25519'), str(request.headers.get('X-Signature-Timestamp')), request.data, PUBLIC_KEY):
     return jsonify({"error": "Invalid request"}), 401
 
 def verify_key(signature, timestamp, raw_body, client_public_key):
