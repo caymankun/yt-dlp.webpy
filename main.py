@@ -142,7 +142,7 @@ def get_embedded_media():
             return 'URL not found in result', 500
 
 
-//beta api
+# beta api
 
 PUBLIC_KEY = os.getenv('PUBLIC_KEY')
 CLIENT_ID = os.getenv('CLIENT_ID')
