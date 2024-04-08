@@ -1,4 +1,5 @@
 flask
 yt-dlp
 flask-cors
-ffmpeg-python
+requests
+discord-interactions
