@@ -151,10 +151,12 @@ DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 @app.route('/interactions', methods=['POST'])
 def interactions():
     data = request.json
-    if not verify_key(request.headers.get('X-Signature-Ed25519'), str(request.headers.get('X-Signature-Timestamp')), request.data, PUBLIC_KEY):
-        return jsonify({"error": "Invalid request"}), 401
+    
 
-    def verify_key(signature, timestamp, raw_body, client_public_key):
+    if not verify_key(request.headers.get('X-Signature-Ed25519'), str(request.headers.get('X-Signature-Timestamp')), request.data, PUBLIC_KEY):
+    return jsonify({"error": "Invalid request"}), 401
+
+def verify_key(signature, timestamp, raw_body, client_public_key):
     """Verify the signature of a Discord interaction request."""
     # Convert timestamp to string
     timestamp_str = str(timestamp)
@@ -169,6 +171,8 @@ def interactions():
 
     # Compare the calculated signature with the provided signature
     return hmac.compare_digest(signature, calculated_signature)
+
+    
 
     interaction_type = InteractionType(data["type"])
 
