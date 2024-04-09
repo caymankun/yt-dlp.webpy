@@ -168,7 +168,7 @@ def interactions():
 
             # レスポンスを送信
             response_data = {"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE}
-            return jsonify(data["response_url"], json=response_data), 200
+            return jsonify(data["response_url"], json=response_data)
 
             try:
                 # yt-dlpを使用してURLを取得
