@@ -219,8 +219,6 @@ def interactions():
                         message_data = {"content": "動画を取得しました"}  # Placeholder message
                         requests.post(interaction_data["response_url"], json=message_data)
                         return '', 200
-        
-            return '', 200
    
 @app.route('/register-commands', methods=['GET'])
 def register_commands():
