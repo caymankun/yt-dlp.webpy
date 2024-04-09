@@ -254,9 +254,6 @@ def register_commands():
         if response.status_code == 200:
             print('Commands registered:', response.json())
             return 'Commands have been registered'
-        else:
-            print('Error registering commands:', response.text)
-            return 'Error registering commands', response.status_code
     except Exception as e:
         print('Error registering commands:', e)
         return 'Error registering commands', 500
