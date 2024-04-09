@@ -183,7 +183,7 @@ def interactions():
                     ydl_opts['format'] = 'bestaudio'
                     ydl_opts['extract_audio'] = True
 
-                with YoutubeDL(ydl_opts) as ydl:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(url, download=False)
                     if 'url' in result:
                         video_url = result['url']
@@ -217,8 +217,13 @@ def interactions():
                         }
                         # Send the actual response
                         message_data = {"content": "動画を取得しました"}  # Placeholder message
-                        requests.post(interaction_data["response_url"], json=message_data)
+                        requests.post(data["response_url"], json=message_data)
                         return '', 200
+            except Exception as e:
+                print('Error processing interaction:', e)
+                return 'Error processing interaction', 500
+    
+    return '', 200
    
 @app.route('/register-commands', methods=['GET'])
 def register_commands():
