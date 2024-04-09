@@ -249,18 +249,17 @@ def register_commands():
         }
     ]
 
-            try:
-                response = requests.put(f"https://discord.com/api/v9/applications/{CLIENT_ID}/commands", json=commands, headers={"Authorization": f"Bot {DISCORD_TOKEN}", "Content-Type": "application/json"})
-                if response.status_code == 200:
-                    print('Commands registered:', response.json())
-                    return 'Commands have been registered'
-                else:
-                    print('Error registering commands:', response.text)
-                    return 'Error registering commands', response.status_code
-            except Exception as e:
-                print('Error registering commands:', e)
-                return 'Error registering commands', 500
-
+    try:
+        response = requests.put(f"https://discord.com/api/v9/applications/{CLIENT_ID}/commands", json=commands, headers={"Authorization": f"Bot {DISCORD_TOKEN}", "Content-Type": "application/json"})
+        if response.status_code == 200:
+            print('Commands registered:', response.json())
+            return 'Commands have been registered'
+        else:
+            print('Error registering commands:', response.text)
+            return 'Error registering commands', response.status_code
+    except Exception as e:
+        print('Error registering commands:', e)
+        return 'Error registering commands', 500
 
 if __name__ == '__main__':
     app.run(debug=False)
