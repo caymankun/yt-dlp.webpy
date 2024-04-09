@@ -168,7 +168,7 @@ def interactions():
 
             # レスポンスを送信
             response_data = {"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE}
-            requests.post(data["response_url"], json=response_data)
+            return jsonify(data["response_url"], json=response_data), 200
 
             try:
                 # yt-dlpを使用してURLを取得
@@ -210,8 +210,7 @@ def interactions():
                             "Content-Type": "application/json"
                         }
                         channel_id = data["channel_id"]
-                        response = requests.post(data["response_url"], json=message_data, headers=headers)
-                        return '', 200 if response.status_code == 200 else 500
+                        return jsonify(data["response_url"], json=message_data, headers=headers), 200
 
                     else:
                         return jsonify({"content": "動画が見つかりませんでした"}), 200
