@@ -154,9 +154,7 @@ DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 @app.route('/interactions', methods=['POST'])
 @verify_key_decorator(PUBLIC_KEY)
 def interactions():
-    data = request.json
-    
-    interaction_type = InteractionType(data["type"])
+    interaction_type = request.json
 
     if interaction_type == InteractionType.PING:
         return jsonify({"type": InteractionResponseType.PONG})
