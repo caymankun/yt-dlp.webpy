@@ -168,7 +168,7 @@ def interactions():
     elif interaction_type == 2:
         # 遅延レスポンスを返す
         response_data = {"type": 5}
-        response = requests.post(data["response_url"], json=response_data)
+        response = requests.post(json=response_data)
         
         command = data["data"]["name"]
         
@@ -215,9 +215,7 @@ def interactions():
                             "Authorization": f"Bot {DISCORD_TOKEN}",
                             "Content-Type": "application/json"
                         }
-                        # Send the actual response
-                        message_data = {"content": "動画を取得しました"}  # Placeholder message
-                        requests.post(data["response_url"], json=message_data)
+                        requests.post(json=message_data)
                         return '', 200
             except Exception as e:
                 print('Error processing interaction:', e)
