@@ -262,6 +262,7 @@ def register_commands():
     except Exception as e:
         print('Error registering commands:', e)
         return 'Error registering commands', 500
+return '', 200
 
 if __name__ == '__main__':
     app.run(debug=False)
