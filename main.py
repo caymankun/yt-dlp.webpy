@@ -168,7 +168,7 @@ def interactions():
 
             # レスポンスを送信
             response_data = {"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE}
-            return requests.post(data["response_url"], json=response_data)
+            return requests.post(data["response_url"], json=response_data), 200
 
             try:
                 # yt-dlpを使用してURLを取得
@@ -210,14 +210,14 @@ def interactions():
                             "Content-Type": "application/json"
                         }
                         channel_id = data["channel_id"]
-                        return requests.post(data["response_url"], json=message_data, headers=headers)
+                        return requests.post(data["response_url"], json=message_data, headers=headers), 200
 
                         return jsonify({"content": "動画を取得しました"})
                     else:
                         return jsonify({"content": "動画が見つかりませんでした"})
             except Exception as e:
                 return jsonify({"content": f"動画の取得中にエラーが発生しました: {str(e)}"}), 500
-        return '', 200
+                
 @app.route('/register-commands', methods=['GET'])
 def register_commands():
     print('Received command registration request')
