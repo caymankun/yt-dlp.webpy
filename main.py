@@ -151,6 +151,12 @@ PUBLIC_KEY = os.getenv('PUBLIC_KEY')
 CLIENT_ID = os.getenv('CLIENT_ID')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
+def send_deferred_response(response_url, response_data):
+    """Send a deferred response to the provided response URL."""
+    headers = {
+        "Content-Type": "application/json"
+    }
+
 @app.route('/interactions', methods=['POST'])
 @verify_key_decorator(PUBLIC_KEY)
 def interactions():
@@ -166,9 +172,9 @@ def interactions():
             url = data["data"]["options"][0]["value"]
             media_type = data["data"]["options"][1]["value"]
 
-            # レスポンスを送信
+            # 遅延チャンネルメッセージを送信
             response_data = {"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE}
-            return jsonify(data["response_url"], json=response_data)
+            send_deferred_response(data["response_url"], response_data)
 
             try:
                 # yt-dlpを使用してURLを取得
