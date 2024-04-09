@@ -168,7 +168,7 @@ def interactions():
     elif interaction_type == 2:
         # 遅延レスポンスを返す
         response_data = {"type": 5}
-        response = requests.post(json=response_data)
+        response = requests.post(f"https://discord.com/api/v9/interactions/{data['id']}/{data['token']}/callback", json=response_data, headers={"Authorization": f"Bot {DISCORD_TOKEN}"})
         
         command = data["data"]["name"]
         
@@ -215,7 +215,7 @@ def interactions():
                             "Authorization": f"Bot {DISCORD_TOKEN}",
                             "Content-Type": "application/json"
                         }
-                        requests.post(json=message_data)
+                        requests.post(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
                         return '', 200
             except Exception as e:
                 print('Error processing interaction:', e)
