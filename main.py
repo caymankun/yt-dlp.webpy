@@ -168,7 +168,7 @@ def interactions():
     elif interaction_type == 2:
         # 遅延レスポンスを返す
         response_data = {"type": 5}
-        response = requests.post(f"https://discord.com/api/v9/interactions/{data['id']}/{data['token']}/callback", json=response_data, headers={"Authorization": f"Bot {DISCORD_TOKEN}"})
+        response = requests.post(f"https://discord.com/api/v9/interactions/{data['id']}/{data['token']}/callback", json=response_data, headers={"Authorization": f"Bot {DISCORD_TOKEN}", "Content-Type": "application/json"})
         
         command = data["data"]["name"]
         
