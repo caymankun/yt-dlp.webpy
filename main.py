@@ -217,7 +217,7 @@ def interactions():
                         return jsonify({"content": "動画が見つかりませんでした"})
             except Exception as e:
                 return jsonify({"content": f"動画の取得中にエラーが発生しました: {str(e)}"}), 500
-
+        return '', 200
 @app.route('/register-commands', methods=['GET'])
 def register_commands():
     print('Received command registration request')
