@@ -160,16 +160,13 @@ def interactions():
         return jsonify({"type": InteractionResponseType.PONG}), 200
 
     elif interaction_type == InteractionType.APPLICATION_COMMAND:
+        return jsonify({"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE})
+        
         command = data["data"]["name"]
         
         if command == "yt":
             url = data["data"]["options"][0]["value"]
             media_type = data["data"]["options"][1]["value"]
-
-            # 遅延チャンネルメッセージを送信
-            response_data = {"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE}
-            requests.post(data["response_url"], response_data)
-            return '', 200
 
             try:
                 # yt-dlpを使用してURLを取得
