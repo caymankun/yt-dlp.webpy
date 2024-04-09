@@ -151,12 +151,6 @@ PUBLIC_KEY = os.getenv('PUBLIC_KEY')
 CLIENT_ID = os.getenv('CLIENT_ID')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-def send_deferred_response(response_url, response_data):
-    """Send a deferred response to the provided response URL."""
-    headers = {
-        "Content-Type": "application/json"
-    }
-
 @app.route('/interactions', methods=['POST'])
 @verify_key_decorator(PUBLIC_KEY)
 def interactions():
@@ -174,7 +168,8 @@ def interactions():
 
             # 遅延チャンネルメッセージを送信
             response_data = {"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE}
-            send_deferred_response(data["response_url"], response_data)
+            requests.post(data["response_url"], response_data)
+            return '', 200
 
             try:
                 # yt-dlpを使用してURLを取得
@@ -220,7 +215,7 @@ def interactions():
                         requests.post(interaction_data["response_url"], json=message_data)
                         return '', 200
         
-                    except Exception as e:
+                    except :
                         error_message = f"動画の取得中にエラーが発生しました: {str(e)}"
                         error_response = {"content": error_message}
                         requests.post(interaction_data["response_url"], json=error_response)
