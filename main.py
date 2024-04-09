@@ -173,7 +173,7 @@ def interactions():
         command = data["data"]["name"]
         
         if command == "yt":
-            url = data["data"]["options"][0]["value"]
+            ipturl = data["data"]["options"][0]["value"]
             media_type = data["data"]["options"][1]["value"]
 
             try:
@@ -184,7 +184,7 @@ def interactions():
                     ydl_opts['extract_audio'] = True
 
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    result = ydl.extract_info(url, download=False)
+                    result = ydl.extract_info(ipturl, download=False)
                     if 'url' in result:
                         video_url = result['url']
                         thumbnail = result.get('thumbnail')
@@ -198,7 +198,7 @@ def interactions():
                             "type": "link",
                             "title": title,
                             "description": description,
-                            "url": url,
+                            "url": video_url,
                             "color": 0x0000FF,
                             "image": {"url": thumbnail},
                             "author": {"name": uploader, "url": uploader_url}
