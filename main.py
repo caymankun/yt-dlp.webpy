@@ -215,12 +215,6 @@ def interactions():
                         requests.post(interaction_data["response_url"], json=message_data)
                         return '', 200
         
-                    except :
-                        error_message = f"動画の取得中にエラーが発生しました: {str(e)}"
-                        error_response = {"content": error_message}
-                        requests.post(interaction_data["response_url"], json=error_response)
-                        return '', 200
-        
             return '', 200
    
 @app.route('/register-commands', methods=['GET'])
