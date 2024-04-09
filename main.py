@@ -215,7 +215,7 @@ def interactions():
                             "Authorization": f"Bot {DISCORD_TOKEN}",
                             "Content-Type": "application/json"
                         }
-                        requests.post(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
+                        requests.patch(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
                         return '', 200
             except Exception as e:
                 print('Error processing interaction:', e)
