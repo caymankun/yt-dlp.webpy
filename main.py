@@ -215,16 +215,18 @@ def interactions():
                             "Authorization": f"Bot {DISCORD_TOKEN}",
                             "Content-Type": "application/json"
                         }
-                        channel_id = data["channel_id"]
-                        return jsonify(data["response_url"], json=message_data, headers=headers), 200
-
-                    else:
-                        return jsonify({"content": "動画が見つかりませんでした"}), 200
-
-            except Exception as e:
-                return jsonify({"content": f"動画の取得中にエラーが発生しました: {str(e)}"}), 500
-
-    return '', 200
+                        # Send the actual response
+                        message_data = {"content": "動画を取得しました"}  # Placeholder message
+                        requests.post(interaction_data["response_url"], json=message_data)
+                        return '', 200
+        
+                    except Exception as e:
+                        error_message = f"動画の取得中にエラーが発生しました: {str(e)}"
+                        error_response = {"content": error_message}
+                        requests.post(interaction_data["response_url"], json=error_response)
+                        return '', 200
+        
+            return '', 200
    
 @app.route('/register-commands', methods=['GET'])
 def register_commands():
