@@ -204,11 +204,6 @@ def interactions():
                             "author": {"name": uploader, "url": uploader_url}
                         }
 
-                        if media_type == 'video':
-                            embed["video"] = {"url": video_url}
-                        elif media_type == 'audio':
-                            embed["audio"] = {"url": video_url}
-
                         # メッセージを送信
                         message_data = {"embeds": [embed]}
                         headers = {
