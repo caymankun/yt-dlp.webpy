@@ -168,7 +168,7 @@ def interactions():
 
             # レスポンスを送信
             response_data = {"type": InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE}
-            requests.post(data["response_url"], json=response_data)
+            return requests.post(data["response_url"], json=response_data)
 
             try:
                 # yt-dlpを使用してURLを取得
@@ -210,8 +210,7 @@ def interactions():
                             "Content-Type": "application/json"
                         }
                         channel_id = data["channel_id"]
-                        message_url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
-                        requests.post(message_url, json=message_data, headers=headers)
+                        return requests.post(data["response_url"], json=message_data, headers=headers)
 
                         return jsonify({"content": "動画を取得しました"})
                     else:
