@@ -199,7 +199,7 @@ def interactions():
                             "title": title,
                             "description": description,
                             "url": video_url,
-                            "color": #ff0000,
+                            "color": 0x0000FF,
                             "image": {"url": thumbnail},
                             "author": {"name": uploader, "url": uploader_url}
                         }
