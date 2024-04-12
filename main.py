@@ -240,7 +240,6 @@ def interactions():
         
                         # Embedを作成
                         embed = {
-                            "type": "rich",
                             "title": title,
                             "color": 15548997,
                             "author": {"name": uploader, "url": uploader_url}
