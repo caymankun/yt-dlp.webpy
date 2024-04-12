@@ -246,7 +246,7 @@ def interactions():
                         }
                         
                         if media_type == 'video':
-                            embed["video"] = {"url": media_url}
+                            embed["video"] = {"url": media_url,"width": 1280,"height": 720}
                         elif media_type == 'audio':
                             embed["audio"] = {"url": media_url}
 
