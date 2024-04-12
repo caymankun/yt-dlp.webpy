@@ -296,6 +296,28 @@ def register_commands():
                     ]
                 }
             ]
+        },
+        {
+            "name": "yt-player",
+            "description": "Fetch playing from YouTube URL",
+            "options": [
+                {
+                    "name": "url",
+                    "description": "YouTube URL",
+                    "type": 3,
+                    "required": True
+                },
+                {
+                    "name": "type",
+                    "description": "Type of content (video or audio)",
+                    "type": 3,
+                    "required": True,
+                    "choices": [
+                        {"name": "動画", "value": "video"},
+                        {"name": "音楽", "value": "audio"}
+                    ]
+                }
+            ]
         }
     ]
 
