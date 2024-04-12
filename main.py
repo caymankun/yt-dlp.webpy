@@ -249,11 +249,11 @@ def interactions():
                         }
         
                         if media_type == 'video':
-                            embed["fields"] = [
+                            embed["video"] = [
                                 {"name": "Video", "value": f"<video controls><source src='{media_url}' type='video/mp4'></video>"}
                             ]
                         elif media_type == 'audio':
-                            embed["fields"] = [
+                            embed["audio"] = [
                                 {"name": "Audio", "value": f"<audio controls><source src='{media_url}' type='audio/mpeg'></audio>"}
                             ]
         
