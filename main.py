@@ -200,7 +200,7 @@ def interactions():
                             "title": title,
                             "description": description,
                             "url": video_url,
-                            "color": 0x0000FF,
+                            "color": 15548997,
                             "image": {"url": thumbnail},
                             "author": {"name": uploader, "url": uploader_url}
                         }
@@ -240,22 +240,16 @@ def interactions():
         
                         # Embedを作成
                         embed = {
-                            "type": "rich",
+                            "type": "link",
                             "title": title,
-                            "description": description,
-                            "url": ipturl,
-                            "color": 0x0000FF,
+                            "color": 15548997,
                             "author": {"name": uploader, "url": uploader_url}
                         }
         
                         if media_type == 'video':
-                            embed["video"] = [
-                                {"name": "Video", "value": f"<video controls><source src='{media_url}' type='video/mp4'></video>"}
-                            ]
+                            embed["video"] = {"url": media_url}
                         elif media_type == 'audio':
-                            embed["audio"] = [
-                                {"name": "Audio", "value": f"<audio controls><source src='{media_url}' type='audio/mpeg'></audio>"}
-                            ]
+                            embed["audio"] = {"url": media_url}
         
                         # メッセージを送信
                         message_data = {"embeds": [embed]}
