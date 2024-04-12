@@ -172,7 +172,7 @@ def interactions():
         
         command = data["data"]["name"]
         
-        if command == "yt":
+        if command == "yt-ogp":
             ipturl = data["data"]["options"][0]["value"]
             media_type = data["data"]["options"][1]["value"]
 
@@ -224,7 +224,7 @@ def register_commands():
 
     commands = [
         {
-            "name": "yt",
+            "name": "yt-ogp",
             "description": "Fetch information from YouTube URL",
             "options": [
                 {
