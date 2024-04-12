@@ -240,16 +240,17 @@ def interactions():
         
                         # Embedを作成
                         embed = {
-                            "type": "link",
+                            "type": "rich",
                             "title": title,
                             "color": 15548997,
                             "author": {"name": uploader, "url": uploader_url}
                         }
-        
+                        
                         if media_type == 'video':
                             embed["video"] = {"url": media_url}
                         elif media_type == 'audio':
                             embed["audio"] = {"url": media_url}
+
         
                         # メッセージを送信
                         message_data = {"embeds": [embed]}
