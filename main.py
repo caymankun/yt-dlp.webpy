@@ -164,7 +164,6 @@ def interactions():
     if interaction_type == 1:
         response_ping = {"type": 1}
         requests.post(f"https://discord.com/api/v9/interactions/{data['id']}/{data['token']}/callback", json=response_ping, headers={"Authorization": f"Bot {DISCORD_TOKEN}", "Content-Type": "application/json"})
-        
 
     # APPLICATION_COMMANDの場合は遅延レスポンスを返す
     elif interaction_type == 2:
