@@ -218,59 +218,60 @@ def interactions():
                 print('Error processing interaction:', e)
                 return 'Error processing interaction', 500
                 
-        if command == "yt-player":
-            ipturl = data["data"]["options"][0]["value"]
-                media_type = data["data"]["options"][1]["value"]
-            
-                try:
-                    # yt-dlpを使用してURLを取得
-                    ydl_opts = {'format': 'best', 'no_cache': True}
-                    if media_type == 'audio':
-                        ydl_opts['format'] = 'bestaudio'
-                        ydl_opts['extract_audio'] = True
-            
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        result = ydl.extract_info(ipturl, download=False)
-                        if 'url' in result:
-                            video_url = result['url']
-                            thumbnail = result.get('thumbnail')
-                            title = result.get('title')
-                            description = result.get('description', '')[:100]  # descriptionを取得し、最大100文字までに制限する
-                            uploader = result.get('uploader')
-                            uploader_url = result.get('uploader_url')
-            
-                            # Embedを作成
-                            embed = {
-                                "type": "rich",
-                                "title": title,
-                                "description": description,
-                                "url": ipturl,
-                                "color": 0x0000FF,
-                                "author": {"name": uploader, "url": uploader_url}
-                            }
-            
-                            if media_type == 'video':
-                                embed["fields"] = [
-                                    {"name": "Video", "value": f"<video controls><source src='{media_url}' type='video/mp4'></video>"}
-                                ]
-                            elif media_type == 'audio':
-                                embed["fields"] = [
-                                    {"name": "Audio", "value": f"<audio controls><source src='{media_url}' type='audio/mpeg'></audio>"}
-                            ]
-            
-                            # メッセージを送信
-                            message_data = {"embeds": [embed]}
-                            headers = {
-                                "Authorization": f"Bot {DISCORD_TOKEN}",
-                                "Content-Type": "application/json"
-                            }
-                            requests.patch(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
-                            return '', 200
-                except Exception as e:
-                    print('Error processing interaction:', e)
-                    return 'Error processing interaction', 500
-    return '', 200
-   
+if command == "yt-player":
+    ipturl = data["data"]["options"][0]["value"]
+    media_type = data["data"]["options"][1]["value"]
+    
+    try:
+        # yt-dlpを使用してURLを取得
+        ydl_opts = {'format': 'best', 'no_cache': True}
+        if media_type == 'audio':
+            ydl_opts['format'] = 'bestaudio'
+            ydl_opts['extract_audio'] = True
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            result = ydl.extract_info(ipturl, download=False)
+            if 'url' in result:
+                media_url = result['url']
+                thumbnail = result.get('thumbnail')
+                title = result.get('title')
+                description = result.get('description', '')[:100]  # descriptionを取得し、最大100文字までに制限する
+                uploader = result.get('uploader')
+                uploader_url = result.get('uploader_url')
+
+                # Embedを作成
+                embed = {
+                    "type": "rich",
+                    "title": title,
+                    "description": description,
+                    "url": ipturl,
+                    "color": 0x0000FF,
+                    "author": {"name": uploader, "url": uploader_url}
+                }
+
+                if media_type == 'video':
+                    embed["fields"] = [
+                        {"name": "Video", "value": f"<video controls><source src='{media_url}' type='video/mp4'></video>"}
+                    ]
+                elif media_type == 'audio':
+                    embed["fields"] = [
+                        {"name": "Audio", "value": f"<audio controls><source src='{media_url}' type='audio/mpeg'></audio>"}
+                    ]
+
+                # メッセージを送信
+                message_data = {"embeds": [embed]}
+                headers = {
+                    "Authorization": f"Bot {DISCORD_TOKEN}",
+                    "Content-Type": "application/json"
+                }
+                requests.patch(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
+                return '', 200
+    except Exception as e:
+        print('Error processing interaction:', e)
+        return 'Error processing interaction', 500
+        
+return '', 200
+
 @app.route('/register-commands', methods=['GET'])
 def register_commands():
     print('Received command registration request')
