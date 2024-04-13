@@ -252,8 +252,10 @@ def interactions():
                         elif media_type == 'audio':
                             embed["audio"] = {"url": media_url}
 
+                        cnlid = data[channel_id]
+                        
                         # pl.pyをサブプロセスとして実行し、データを渡す
-                        subprocess.run(["python", "./pl.py", embed , data[channel_id] ])
+                        subprocess.run(["python", "./pl.py", embed , cnlid ])
 
                         return '', 200
             except Exception as e:
