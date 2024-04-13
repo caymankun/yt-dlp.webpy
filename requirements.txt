@@ -3,4 +3,3 @@ yt-dlp
 flask-cors
 requests
 discord-interactions
-discord.py
