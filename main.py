@@ -159,6 +159,8 @@ def interactions():
     # JSONデータを取得
     data = request.json
 
+    print(data)
+
     # インタラクションの種類を取得
     interaction_type = data["type"]
 
