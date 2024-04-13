@@ -220,44 +220,6 @@ def interactions():
             except Exception as e:
                 print('Error processing interaction:', e)
                 return 'Error processing interaction', 500
-                
-        if command == "yt-info":
-            ipturl = data["data"]["options"][0]["value"]
-            
-            try:
-                # yt-dlpを使用してURLを取得
-                ydl_opts = {'format': 'best', 'no_cache': True}
-        
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    result = ydl.extract_info(ipturl, download=False)
-                    if 'url' in result:
-                        thumbnail = result.get('thumbnail')
-                        title = result.get('title')
-                        description = result.get('description', '')[:100]  # descriptionを取得し、最大100文字までに制限する
-                        uploader = result.get('uploader')
-                        uploader_url = result.get('uploader_url')
-
-                        # Embedを作成
-                        embed = {
-                            "type": "link",
-                            "title": title,
-                            "description": description,
-                            "color": 15548997,
-                            "image": {"url": thumbnail},
-                            "author": {"name": uploader, "url": uploader_url}
-                        }
-
-                        # メッセージを送信
-                        message_data = {"embeds": [embed]}
-                        headers = {
-                            "Authorization": f"Bot {DISCORD_TOKEN}",
-                            "Content-Type": "application/json"
-                        }
-                        requests.patch(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
-                        return '', 200
-            except Exception as e:
-                print('Error processing interaction:', e)
-                return 'Error processing interaction', 500
     return '', 200
 
 @app.route('/register-commands', methods=['GET'])
@@ -284,18 +246,6 @@ def register_commands():
                         {"name": "動画", "value": "video"},
                         {"name": "音楽", "value": "audio"}
                     ]
-                }
-            ]
-        },
-        {
-            "name": "yt-info",
-            "description": "YouTube URL info",
-            "options": [
-                {
-                    "name": "url",
-                    "description": "YouTube URL",
-                    "type": 3,
-                    "required": True
                 }
             ]
         }
