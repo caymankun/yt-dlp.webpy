@@ -221,44 +221,39 @@ def interactions():
                 print('Error processing interaction:', e)
                 return 'Error processing interaction', 500
                 
-        if command == "yt-player":
+        if command == "yt-info":
             ipturl = data["data"]["options"][0]["value"]
-            media_type = data["data"]["options"][1]["value"]
             
             try:
                 # yt-dlpを使用してURLを取得
                 ydl_opts = {'format': 'best', 'no_cache': True}
-                if media_type == 'audio':
-                    ydl_opts['format'] = 'bestaudio'
-                    ydl_opts['extract_audio'] = True
         
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(ipturl, download=False)
                     if 'url' in result:
-                        media_url = result['url']
                         thumbnail = result.get('thumbnail')
                         title = result.get('title')
                         description = result.get('description', '')[:100]  # descriptionを取得し、最大100文字までに制限する
                         uploader = result.get('uploader')
                         uploader_url = result.get('uploader_url')
-        
+
                         # Embedを作成
                         embed = {
+                            "type": "link",
                             "title": title,
+                            "description": description,
                             "color": 15548997,
+                            "image": {"url": thumbnail},
                             "author": {"name": uploader, "url": uploader_url}
                         }
-                        
-                        if media_type == 'video':
-                            embed["video"] = {"url": media_url}
-                        elif media_type == 'audio':
-                            embed["audio"] = {"url": media_url}
 
-                        cnlid = data['channel_id']
-                        
-                        # pl.pyをサブプロセスとして実行し、データを渡す
-                        subprocess.run(["python", "./pl.py", embed , cnlid ])
-
+                        # メッセージを送信
+                        message_data = {"embeds": [embed]}
+                        headers = {
+                            "Authorization": f"Bot {DISCORD_TOKEN}",
+                            "Content-Type": "application/json"
+                        }
+                        requests.patch(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
                         return '', 200
             except Exception as e:
                 print('Error processing interaction:', e)
@@ -293,24 +288,14 @@ def register_commands():
             ]
         },
         {
-            "name": "yt-player",
-            "description": "Fetch playing from YouTube URL",
+            "name": "yt-info",
+            "description": "YouTube URL info",
             "options": [
                 {
                     "name": "url",
                     "description": "YouTube URL",
                     "type": 3,
                     "required": True
-                },
-                {
-                    "name": "type",
-                    "description": "Type of content (video or audio)",
-                    "type": 3,
-                    "required": True,
-                    "choices": [
-                        {"name": "動画", "value": "video"},
-                        {"name": "音楽", "value": "audio"}
-                    ]
                 }
             ]
         }
