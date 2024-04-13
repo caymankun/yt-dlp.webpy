@@ -146,6 +146,8 @@ def get_embedded_media():
 
 import hmac
 import hashlib
+import subprocess
+import json
 
 PUBLIC_KEY = os.getenv('PUBLIC_KEY')
 CLIENT_ID = os.getenv('CLIENT_ID')
@@ -246,18 +248,13 @@ def interactions():
                         }
                         
                         if media_type == 'video':
-                            embed["image"] = {"url": media_url}
+                            embed["video"] = {"url": media_url}
                         elif media_type == 'audio':
-                            embed["image"] = {"url": media_url}
+                            embed["audio"] = {"url": media_url}
 
-        
-                        # メッセージを送信
-                        message_data = {"embeds": [embed]}
-                        headers = {
-                            "Authorization": f"Bot {DISCORD_TOKEN}",
-                            "Content-Type": "application/json"
-                        }
-                        requests.patch(f"https://discord.com/api/v9/webhooks/{CLIENT_ID}/{data['token']}/messages/@original", json=message_data, headers=headers)
+                        # pl.pyをサブプロセスとして実行し、データを渡す
+                        subprocess.run(["python", "pl.py", embed])
+
                         return '', 200
             except Exception as e:
                 print('Error processing interaction:', e)
